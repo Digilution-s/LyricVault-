@@ -1,0 +1,6 @@
+{
+  "name": "LyricVault",
+  "description": "A social lyric bookmarking platform to discover, save, and curate meaningful lyrics and words that stay with you.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
