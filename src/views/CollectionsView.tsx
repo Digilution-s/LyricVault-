@@ -34,7 +34,7 @@ interface CollectionsViewProps {
   onDeleteCollectionSubmit: (collectionId: string) => Promise<void>;
   onNavigateTab: (tab: string) => void;
   showToast?: (message: string, type?: 'success' | 'error' | 'info') => void;
-  onOpenAuthPrompt: (context?: 'save' | 'bookmark') => void;
+  onOpenAuthPrompt: (context?: 'save' | 'bookmark' | 'note') => void;
   onRefreshCollections: () => void;
 }
 

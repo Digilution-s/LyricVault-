@@ -24,6 +24,7 @@ interface LyricDetailModalProps {
   onOpenReadingMode?: (lyric: Lyric) => void;
   onEditLyric?: (lyric: Lyric) => void;
   onDeleteLyric?: (lyric: Lyric) => void;
+  onOpenAuthPrompt?: (context?: 'save' | 'bookmark' | 'note') => void;
   showToast?: (message: string, type?: 'success' | 'error' | 'info') => void;
 }
 
@@ -55,6 +56,7 @@ export const LyricDetailModal: React.FC<LyricDetailModalProps> = ({
   onOpenReadingMode,
   onEditLyric,
   onDeleteLyric,
+  onOpenAuthPrompt,
   showToast,
 }) => {
   const { user, isAuthenticated } = useAuth();
@@ -245,8 +247,14 @@ export const LyricDetailModal: React.FC<LyricDetailModalProps> = ({
               {annotations.length > 0 && (
                 <button
                   id={`modal-notes-badge-${lyric.id}`}
-                  onClick={() => setIsNotesSheetOpen(true)}
-                  className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full bg-[#8B2F4A]/10 hover:bg-[#8B2F4A] text-[#8B2F4A] hover:text-white dark:bg-[#E06C88]/20 dark:hover:bg-[#E06C88] dark:text-[#E06C88] dark:hover:text-zinc-950 text-xs font-bold transition-all shadow-xs min-h-[32px] shrink-0"
+                  onClick={() => {
+                    if (!isAuthenticated) {
+                      onOpenAuthPrompt?.('note');
+                      return;
+                    }
+                    setIsNotesSheetOpen(true);
+                  }}
+                  className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full bg-[#8B2F4A]/10 hover:bg-[#8B2F4A] text-[#8B2F4A] hover:text-white dark:bg-[#E06C88]/20 dark:hover:bg-[#E06C88] dark:text-[#E06C88] dark:hover:text-zinc-950 text-xs font-bold transition-all shadow-xs min-h-[32px] shrink-0 cursor-pointer"
                   title="View your private notes for this lyric"
                 >
                   <Sparkles className="h-3.5 w-3.5 shrink-0" />
@@ -295,7 +303,7 @@ export const LyricDetailModal: React.FC<LyricDetailModalProps> = ({
             onSelectAnnotation={(anno) => setViewingAnnotation(anno)}
             onRequestAddAnnotation={(sel) => {
               if (!isAuthenticated) {
-                showToast?.('Please sign in to add personal notes to lyrics.', 'info');
+                onOpenAuthPrompt?.('note');
                 return;
               }
               setActiveEditorSelection(sel);
@@ -317,17 +325,19 @@ export const LyricDetailModal: React.FC<LyricDetailModalProps> = ({
         )}
 
         {/* Theme Tags */}
-        <div className="flex flex-wrap items-center gap-2 mb-6">
-          <span className="text-xs font-medium text-[var(--text-secondary)]">Themes:</span>
-          {lyric.themes.map((theme) => (
-            <span
-              key={theme}
-              className="rounded-lg bg-[var(--bg-muted)] px-2.5 py-1 text-xs font-medium text-[var(--text-secondary)]"
-            >
-              #{theme}
-            </span>
-          ))}
-        </div>
+        {lyric.themes && lyric.themes.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2 mb-6">
+            <span className="text-xs font-medium text-[var(--text-secondary)]">Themes:</span>
+            {lyric.themes.map((theme) => (
+              <span
+                key={theme}
+                className="rounded-lg bg-[var(--bg-muted)] px-2.5 py-1 text-xs font-medium text-[var(--text-secondary)]"
+              >
+                #{theme}
+              </span>
+            ))}
+          </div>
+        )}
 
         {/* Creator & Timestamp */}
         <div className="flex flex-wrap items-center justify-between gap-y-2 border-t border-[var(--border-color)]/60 pt-4 text-xs text-[var(--text-secondary)]">
@@ -385,8 +395,14 @@ export const LyricDetailModal: React.FC<LyricDetailModalProps> = ({
             {/* Bookmark / Save */}
             <button
               id={`modal-bookmark-button-${lyric.id}`}
-              onClick={(e) => onToggleSave(e, lyric.id)}
-              className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold transition-all ${
+              onClick={(e) => {
+                if (!isAuthenticated) {
+                  onOpenAuthPrompt?.('bookmark');
+                  return;
+                }
+                onToggleSave(e, lyric.id);
+              }}
+              className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold transition-all cursor-pointer ${
                 lyric.is_saved
                   ? 'bg-[#8B2F4A] text-white dark:bg-[#E06C88] dark:text-zinc-950'
                   : 'bg-[var(--bg-muted)] text-[var(--text-primary)] hover:bg-[#8B2F4A]/10 hover:text-[#8B2F4A]'
@@ -401,9 +417,13 @@ export const LyricDetailModal: React.FC<LyricDetailModalProps> = ({
               <button
                 id={`modal-add-to-collection-button-${lyric.id}`}
                 onClick={() => {
+                  if (!isAuthenticated) {
+                    onOpenAuthPrompt?.('save');
+                    return;
+                  }
                   onOpenAddToCollection(lyric);
                 }}
-                className="inline-flex items-center gap-2 rounded-full border border-[var(--border-color)] bg-[var(--bg-surface)] px-4 py-2 text-xs font-medium text-[var(--text-primary)] hover:bg-[var(--bg-muted)] transition-colors"
+                className="inline-flex items-center gap-2 rounded-full border border-[var(--border-color)] bg-[var(--bg-surface)] px-4 py-2 text-xs font-medium text-[var(--text-primary)] hover:bg-[var(--bg-muted)] transition-colors cursor-pointer"
               >
                 <FolderPlus className="h-4 w-4 text-[#8B2F4A] dark:text-[#E06C88]" />
                 <span>Add to Collection</span>
@@ -413,8 +433,14 @@ export const LyricDetailModal: React.FC<LyricDetailModalProps> = ({
             {/* Notes Trigger */}
             <button
               id={`modal-notes-sheet-trigger-${lyric.id}`}
-              onClick={() => setIsNotesSheetOpen(true)}
-              className="inline-flex items-center gap-2 rounded-full border border-[var(--border-color)] bg-[var(--bg-surface)] px-4 py-2 text-xs font-medium text-[var(--text-primary)] hover:bg-[var(--bg-muted)] transition-colors"
+              onClick={() => {
+                if (!isAuthenticated) {
+                  onOpenAuthPrompt?.('note');
+                  return;
+                }
+                setIsNotesSheetOpen(true);
+              }}
+              className="inline-flex items-center gap-2 rounded-full border border-[var(--border-color)] bg-[var(--bg-surface)] px-4 py-2 text-xs font-medium text-[var(--text-primary)] hover:bg-[var(--bg-muted)] transition-colors cursor-pointer"
             >
               <Sparkles className="h-4 w-4 text-[#8B2F4A] dark:text-[#E06C88]" />
               <span>Notes ({annotations.length})</span>

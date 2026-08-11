@@ -228,7 +228,7 @@ export const lyricsService = {
           genre: row.genre,
           song_link: row.song_link,
           song_links: parseSongLinks(row.song_link),
-          mood: (row.mood || 'Melancholic') as MoodType,
+          mood: (row.mood || '') as MoodType,
           description: row.description,
           cover_url: row.cover_url,
           visibility: row.visibility || 'public',
@@ -242,7 +242,7 @@ export const lyricsService = {
           updated_at: row.updated_at || new Date().toISOString(),
           likes_count: likeCount,
           saves_count: bookmarkCount || 0,
-          themes: themesList.length > 0 ? themesList : ['Night'],
+          themes: themesList,
           is_saved: isSaved,
           is_liked: isLiked,
         };
@@ -425,7 +425,7 @@ export const lyricsService = {
       genre: data.genre,
       song_link: data.song_link,
       song_links: parseSongLinks(data.song_link),
-      mood: (data.mood || 'Melancholic') as MoodType,
+      mood: (data.mood || '') as MoodType,
       description: data.description,
       cover_url: data.cover_url,
       visibility: data.visibility || 'public',
@@ -439,7 +439,7 @@ export const lyricsService = {
       updated_at: data.updated_at || new Date().toISOString(),
       likes_count: likeCount,
       saves_count: bookmarkCount || 0,
-      themes: themesList.length > 0 ? themesList : ['Night'],
+      themes: themesList,
       is_saved: isSaved,
       is_liked: isLiked,
     };
@@ -496,7 +496,7 @@ export const lyricsService = {
         language: payload.language || 'English',
         genre: payload.genre || null,
         song_link: payload.songLink || null,
-        mood: payload.mood || 'Melancholic',
+        mood: payload.mood || null,
         description: payload.description || null,
         cover_url: payload.coverUrl || null,
         visibility: payload.visibility || 'public',
@@ -535,7 +535,7 @@ export const lyricsService = {
       genre: data.genre,
       song_link: data.song_link,
       song_links: parseSongLinks(data.song_link),
-      mood: (data.mood || 'Melancholic') as MoodType,
+      mood: (data.mood || '') as MoodType,
       description: data.description,
       cover_url: data.cover_url,
       visibility: data.visibility || 'public',
@@ -548,7 +548,7 @@ export const lyricsService = {
       updated_at: data.updated_at || new Date().toISOString(),
       likes_count: 0,
       saves_count: 0,
-      themes: payload.selectedThemes || ['Night'],
+      themes: payload.selectedThemes || [],
       is_saved: false,
       is_liked: false,
     };
@@ -574,6 +574,13 @@ export const lyricsService = {
       coverUrl?: string;
       visibility?: 'public' | 'private';
       selectedThemes?: ThemeType[];
+      creatorInfo?: {
+        name: string;
+        handle: string;
+        avatar?: string;
+        userId: string;
+      };
+      existingLyric?: Lyric;
     }
   ): Promise<Lyric> {
     const title = payload.title.trim();
@@ -589,6 +596,41 @@ export const lyricsService = {
       throw new Error('User authentication required.');
     }
 
+    if (!isSupabaseConfigured()) {
+      const existing = payload.existingLyric;
+      return {
+        id,
+        title,
+        content,
+        content_type: payload.contentType || 'Lyric',
+        author_name: payload.authorName,
+        song_title: payload.songTitle,
+        artist_name: payload.artistName,
+        album_name: payload.albumName,
+        language: payload.language || 'English',
+        genre: payload.genre,
+        song_link: payload.songLink,
+        song_links: parseSongLinks(payload.songLink),
+        mood: (payload.mood || '') as MoodType,
+        description: payload.description,
+        cover_url: payload.coverUrl,
+        visibility: payload.visibility || 'public',
+        created_by: existing?.created_by || {
+          name: payload.creatorInfo?.name || 'LyricVault Creator',
+          handle: payload.creatorInfo?.handle || '@creator',
+          avatar: payload.creatorInfo?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+          userId,
+        },
+        created_at: existing?.created_at || new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        likes_count: existing?.likes_count || 0,
+        saves_count: existing?.saves_count || 0,
+        themes: payload.selectedThemes || [],
+        is_saved: existing?.is_saved || false,
+        is_liked: existing?.is_liked || false,
+      };
+    }
+
     const { data, error } = await supabase
       .from('lyrics')
       .update({
@@ -602,7 +644,7 @@ export const lyricsService = {
         language: payload.language || 'English',
         genre: payload.genre || null,
         song_link: payload.songLink || null,
-        mood: payload.mood || 'Melancholic',
+        mood: payload.mood || null,
         description: payload.description || null,
         cover_url: payload.coverUrl || null,
         visibility: payload.visibility || 'public',
@@ -619,7 +661,7 @@ export const lyricsService = {
     }
 
     // Update themes in lyric_themes
-    if (payload.selectedThemes) {
+    if (payload.selectedThemes !== undefined) {
       await supabase.from('lyric_themes').delete().eq('lyric_id', id);
       if (payload.selectedThemes.length > 0) {
         const themeInserts = payload.selectedThemes.map((themeId) => ({
@@ -630,9 +672,40 @@ export const lyricsService = {
       }
     }
 
-    const updatedLyric = await this.getLyricById(id);
+    const updatedLyric = await this.getLyricById(id, userId);
     if (!updatedLyric) {
-      throw new Error('Failed to retrieve updated lyric.');
+      const existing = payload.existingLyric;
+      return {
+        id,
+        title,
+        content,
+        content_type: payload.contentType || 'Lyric',
+        author_name: payload.authorName,
+        song_title: payload.songTitle,
+        artist_name: payload.artistName,
+        album_name: payload.albumName,
+        language: payload.language || 'English',
+        genre: payload.genre,
+        song_link: payload.songLink,
+        song_links: parseSongLinks(payload.songLink),
+        mood: (payload.mood || '') as MoodType,
+        description: payload.description,
+        cover_url: payload.coverUrl,
+        visibility: payload.visibility || 'public',
+        created_by: existing?.created_by || {
+          name: payload.creatorInfo?.name || 'LyricVault Creator',
+          handle: payload.creatorInfo?.handle || '@creator',
+          avatar: payload.creatorInfo?.avatar,
+          userId,
+        },
+        created_at: existing?.created_at || new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        likes_count: existing?.likes_count || 0,
+        saves_count: existing?.saves_count || 0,
+        themes: payload.selectedThemes || [],
+        is_saved: existing?.is_saved || false,
+        is_liked: existing?.is_liked || false,
+      };
     }
     return updatedLyric;
   },
@@ -738,7 +811,7 @@ export const lyricsService = {
           genre: row.genre,
           song_link: row.song_link,
           song_links: parseSongLinks(row.song_link),
-          mood: (row.mood || 'Melancholic') as MoodType,
+          mood: (row.mood || '') as MoodType,
           description: row.description,
           cover_url: row.cover_url,
           visibility: row.visibility || 'public',
@@ -752,7 +825,7 @@ export const lyricsService = {
           updated_at: row.updated_at || new Date().toISOString(),
           likes_count: likeCount,
           saves_count: bookmarkCount || 0,
-          themes: themesList.length > 0 ? themesList : ['Night'],
+          themes: themesList,
           is_saved: Boolean(bookmarkRow),
           is_liked: isLiked,
         };

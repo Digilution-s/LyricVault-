@@ -1,5 +1,5 @@
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
-import { UserProfileData } from '../types';
+import { UserProfileData, MoodType } from '../types';
 
 export const profileService = {
   // Fetch profile by User ID
@@ -127,7 +127,7 @@ export const profileService = {
           language: row.language || 'English',
           genre: row.genre,
           song_link: row.song_link,
-          mood: row.mood || 'Melancholic',
+          mood: (row.mood || '') as MoodType,
           description: row.description,
           cover_url: row.cover_url,
           visibility: row.visibility || 'public',
@@ -141,7 +141,7 @@ export const profileService = {
           updated_at: row.updated_at || new Date().toISOString(),
           likes_count: 0,
           saves_count: bookmarkCount || 0,
-          themes: themesList.length > 0 ? themesList : ['Night'],
+          themes: themesList,
           is_saved: isSaved,
           is_liked: false,
         };

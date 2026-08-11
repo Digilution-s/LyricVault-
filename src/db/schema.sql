@@ -118,6 +118,10 @@ DROP POLICY IF EXISTS "Lyric themes are viewable by everyone" ON public.lyric_th
 CREATE POLICY "Lyric themes are viewable by everyone" ON public.lyric_themes
   FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Lyric themes can be modified by everyone" ON public.lyric_themes;
+CREATE POLICY "Lyric themes can be modified by everyone" ON public.lyric_themes
+  FOR ALL USING (true) WITH CHECK (true);
+
 -- Seed Initial Default Themes
 INSERT INTO public.themes (id, name, slug, description)
 VALUES 

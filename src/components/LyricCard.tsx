@@ -39,6 +39,11 @@ export const LyricCard: React.FC<LyricCardProps> = ({
   const previewText = lines.slice(0, 3).join('\n');
   const hasMore = lines.length > 3;
 
+  // Metadata calculations
+  const songName = lyric.song_title || lyric.title;
+  const artistName = lyric.artist_name || lyric.author_name;
+  const allLinks = parseSongLinks(lyric.song_link, lyric.song_links);
+
   return (
     <div
       id={`lyric-card-${lyric.id}`}
@@ -80,12 +85,17 @@ export const LyricCard: React.FC<LyricCardProps> = ({
           )}
         </div>
 
-        {/* Title */}
-        <h3 className="mt-3 font-editorial text-lg sm:text-xl font-bold tracking-tight text-[var(--text-primary)] group-hover:text-[#8B2F4A] dark:group-hover:text-[#E06C88] transition-colors break-words">
-          {lyric.title}
-        </h3>
+        {/* 1. Song Name + Artist Name */}
+        <div className="mt-3.5 truncate font-editorial text-lg sm:text-xl font-bold tracking-tight text-[var(--text-primary)] group-hover:text-[#8B2F4A] dark:group-hover:text-[#E06C88] transition-colors">
+          <span>{songName}</span>
+          {artistName && (
+            <span className="font-sans-ui text-xs sm:text-sm font-normal text-[var(--text-secondary)] ml-1.5">
+              by {artistName}
+            </span>
+          )}
+        </div>
 
-        {/* Lyric Content Preview */}
+        {/* 2. Lyrics Content Preview */}
         <div className="mt-2.5 relative">
           <p className="font-editorial text-sm sm:text-base italic leading-relaxed text-[var(--text-primary)]/90 whitespace-pre-line tracking-wide break-words">
             "{previewText}"
@@ -93,72 +103,53 @@ export const LyricCard: React.FC<LyricCardProps> = ({
           </p>
         </div>
 
-        {/* Author / Artist Line & Metadata */}
-        <div className="mt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-[var(--text-secondary)]">
-          <div className="truncate font-sans-ui max-w-full">
-            {lyric.song_title && lyric.artist_name ? (
-              <span className="truncate block">
-                — <strong className="font-medium text-[var(--text-primary)]">{lyric.song_title}</strong> by {lyric.artist_name}
-              </span>
-            ) : lyric.author_name ? (
-              <span className="truncate block">
-                — <strong className="font-medium text-[var(--text-primary)]">{lyric.author_name}</strong>
-              </span>
-            ) : (
-              <span className="truncate block">— {lyric.created_by.name}</span>
-            )}
-          </div>
-
-          <div className="flex flex-wrap items-center gap-1 text-[10px] shrink-0">
+        {/* 3. Language + Music Platform Links */}
+        {(lyric.language || allLinks.length > 0) && (
+          <div className="mt-3 flex flex-wrap items-center gap-1.5 text-xs">
             {lyric.language && (
-              <span className="rounded bg-[var(--bg-muted)] px-1.5 py-0.5 text-[var(--text-secondary)] font-medium shrink-0">
+              <span className="rounded bg-[var(--bg-muted)] px-2 py-0.5 text-[10px] sm:text-[11px] font-semibold text-[var(--text-secondary)] shrink-0">
                 {lyric.language}
               </span>
             )}
-            {(() => {
-              const allLinks = parseSongLinks(lyric.song_link, lyric.song_links);
-              return allLinks.map((url, idx) => {
-                const platform = detectMusicPlatform(url);
-                return (
-                  <a
-                    key={idx}
-                    href={url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={(e) => e.stopPropagation()}
-                    className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-semibold border ${platform.color} hover:opacity-80 transition-opacity shrink-0`}
-                    title={platform.label}
-                  >
-                    <Music className="h-2.5 w-2.5 shrink-0" />
-                    <span>{platform.name}</span>
-                    <ExternalLink className="h-2.5 w-2.5 opacity-70" />
-                  </a>
-                );
-              });
-            })()}
+            {allLinks.map((url, idx) => {
+              const platform = detectMusicPlatform(url);
+              return (
+                <a
+                  key={idx}
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] sm:text-[11px] font-medium border ${platform.color} hover:opacity-80 transition-opacity shrink-0`}
+                  title={platform.label}
+                >
+                  <Music className="h-2.5 w-2.5 shrink-0" />
+                  <span>{platform.name}</span>
+                  <ExternalLink className="h-2.5 w-2.5 opacity-70" />
+                </a>
+              );
+            })}
           </div>
-        </div>
+        )}
 
-        {/* Creator Attribution */}
+        {/* 4. Created by @username */}
         {lyric.created_by?.handle && (
-          <div className="mt-2 flex flex-wrap items-center gap-1 text-[11px] text-[var(--text-secondary)] font-sans-ui" onClick={(e) => e.stopPropagation()}>
-            <span>Created by</span>
-            {lyric.created_by.name && (
-              <span className="font-semibold text-[var(--text-primary)] truncate max-w-[120px]">{lyric.created_by.name}</span>
-            )}
+          <div
+            className="mt-2 flex items-center gap-1 text-[11px] sm:text-xs text-[var(--text-secondary)] font-sans-ui truncate"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <span className="shrink-0">Created by</span>
             {onSelectCreator ? (
-              <span className="inline-flex items-center">
-                <span className="mr-0.5">(</span>
-                <CreatorLink
-                  handle={lyric.created_by.handle}
-                  name={lyric.created_by.name}
-                  avatar={lyric.created_by.avatar}
-                  onClickCreator={onSelectCreator}
-                />
-                <span className="ml-0.5">)</span>
-              </span>
+              <CreatorLink
+                handle={lyric.created_by.handle}
+                name={lyric.created_by.name}
+                avatar={lyric.created_by.avatar}
+                onClickCreator={onSelectCreator}
+              />
             ) : (
-              <span className="font-medium text-[var(--text-secondary)]">({lyric.created_by.handle})</span>
+              <span className="font-medium text-[var(--text-primary)] truncate">
+                {lyric.created_by.name ? `${lyric.created_by.name} (${lyric.created_by.handle})` : lyric.created_by.handle}
+              </span>
             )}
           </div>
         )}

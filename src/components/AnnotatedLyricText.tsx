@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Sparkles, Plus, BookOpen } from 'lucide-react';
+import { Sparkles, Plus, BookOpen, X } from 'lucide-react';
 import { LyricAnnotation } from '../types';
 
 interface SelectionInfo {
@@ -181,9 +181,9 @@ export const AnnotatedLyricText: React.FC<AnnotatedLyricTextProps> = ({
 
       {/* Mobile-First Floating Contextual Action Bar on Text Selection */}
       {activeSelection && (
-        <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-[90] flex items-center gap-2 rounded-full border border-[var(--border-color)] bg-[var(--bg-surface)]/95 px-4 py-2 shadow-2xl backdrop-blur-md animate-fadeIn">
-          <div className="flex items-center gap-2 text-xs font-semibold text-[var(--text-primary)] max-w-[180px] sm:max-w-xs truncate">
-            <Sparkles className="h-4 w-4 text-[#8B2F4A] dark:text-[#E06C88] shrink-0" />
+        <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-[100] flex items-center justify-between gap-1.5 sm:gap-2 rounded-full border border-[var(--border-color)] bg-[var(--bg-surface)]/95 px-3 py-1.5 sm:px-4 sm:py-2 shadow-2xl backdrop-blur-md animate-fadeIn max-w-[calc(100vw-20px)] w-auto shrink-0">
+          <div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--text-primary)] max-w-[80px] xs:max-w-[120px] sm:max-w-[180px] truncate shrink">
+            <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#8B2F4A] dark:text-[#E06C88] shrink-0" />
             <span className="italic truncate">"{activeSelection.selectedText}"</span>
           </div>
 
@@ -200,9 +200,9 @@ export const AnnotatedLyricText: React.FC<AnnotatedLyricTextProps> = ({
               }
               onRequestAddAnnotation(sel);
             }}
-            className="touch-target flex h-10 items-center gap-1 rounded-full bg-[#8B2F4A] px-3.5 py-2 text-xs font-bold text-white hover:bg-[#72243b] dark:bg-[#E06C88] dark:text-zinc-950 dark:hover:bg-[#d45876] transition-all shadow-md active:scale-95 shrink-0 min-h-[44px]"
+            className="touch-target flex h-9 sm:h-10 items-center justify-center gap-1 rounded-full bg-[#8B2F4A] px-2.5 sm:px-3.5 py-1.5 sm:py-2 text-[11px] sm:text-xs font-bold text-white hover:bg-[#72243b] dark:bg-[#E06C88] dark:text-zinc-950 dark:hover:bg-[#d45876] transition-all shadow-md active:scale-95 shrink-0 min-h-[36px] cursor-pointer"
           >
-            <Plus className="h-3.5 w-3.5" />
+            <Plus className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
             <span>Note</span>
           </button>
 
@@ -220,19 +220,19 @@ export const AnnotatedLyricText: React.FC<AnnotatedLyricTextProps> = ({
                 onRequestCreateCard(sel);
               }
             }}
-            className="touch-target flex h-10 items-center gap-1 rounded-full border border-[var(--border-color)] bg-[var(--bg-muted)] px-3.5 py-2 text-xs font-bold text-[var(--text-primary)] hover:bg-[var(--bg-surface)] transition-all shadow-xs active:scale-95 shrink-0 min-h-[44px]"
+            className="touch-target flex h-9 sm:h-10 items-center justify-center gap-1 rounded-full border border-[var(--border-color)] bg-[var(--bg-muted)] px-2.5 sm:px-3.5 py-1.5 sm:py-2 text-[11px] sm:text-xs font-bold text-[var(--text-primary)] hover:bg-[var(--bg-surface)] transition-all shadow-xs active:scale-95 shrink-0 min-h-[36px] cursor-pointer"
           >
-            <Sparkles className="h-3.5 w-3.5 text-[#8B2F4A] dark:text-[#E06C88]" />
+            <Sparkles className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-[#8B2F4A] dark:text-[#E06C88]" />
             <span>Card</span>
           </button>
 
           <button
             type="button"
             onClick={clearSelection}
-            className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] px-2 py-1 text-xs"
+            className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-muted)] transition-colors text-xs shrink-0 cursor-pointer"
             aria-label="Dismiss selection bar"
           >
-            ✕
+            <X className="h-3.5 w-3.5" />
           </button>
         </div>
       )}

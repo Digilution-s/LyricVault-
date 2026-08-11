@@ -38,8 +38,8 @@ export const CreateLyricModal: React.FC<CreateLyricModalProps> = ({
   const [customGenre, setCustomGenre] = useState<string>('');
   const [songLinks, setSongLinks] = useState<string[]>(['']);
   const [coverUrl, setCoverUrl] = useState<string>('');
-  const [mood, setMood] = useState<MoodType>('Melancholic');
-  const [selectedThemes, setSelectedThemes] = useState<ThemeType[]>(['Night']);
+  const [mood, setMood] = useState<MoodType | ''>('');
+  const [selectedThemes, setSelectedThemes] = useState<ThemeType[]>([]);
   const [description, setDescription] = useState('');
   const [visibility, setVisibility] = useState<'public' | 'private'>('public');
 
@@ -80,8 +80,8 @@ export const CreateLyricModal: React.FC<CreateLyricModalProps> = ({
       const parsedLinks = parseSongLinks(editingLyric.song_link, editingLyric.song_links);
       setSongLinks(parsedLinks.length > 0 ? parsedLinks : ['']);
       setCoverUrl(editingLyric.cover_url || '');
-      setMood(editingLyric.mood || 'Melancholic');
-      setSelectedThemes(editingLyric.themes && editingLyric.themes.length > 0 ? editingLyric.themes : ['Night']);
+      setMood((editingLyric.mood as MoodType) || '');
+      setSelectedThemes(editingLyric.themes || []);
       setDescription(editingLyric.description || '');
       setVisibility(editingLyric.visibility === 'private' ? 'private' : 'public');
     } else {
@@ -105,8 +105,8 @@ export const CreateLyricModal: React.FC<CreateLyricModalProps> = ({
     setCustomGenre('');
     setSongLinks(['']);
     setCoverUrl('');
-    setMood('Melancholic');
-    setSelectedThemes(['Night']);
+    setMood('');
+    setSelectedThemes([]);
     setDescription('');
     setVisibility('public');
     setInlineError(null);
@@ -161,9 +161,7 @@ export const CreateLyricModal: React.FC<CreateLyricModalProps> = ({
 
   const toggleTheme = (theme: ThemeType) => {
     if (selectedThemes.includes(theme)) {
-      if (selectedThemes.length > 1) {
-        setSelectedThemes(selectedThemes.filter((t) => t !== theme));
-      }
+      setSelectedThemes(selectedThemes.filter((t) => t !== theme));
     } else {
       if (selectedThemes.length < 3) {
         setSelectedThemes([...selectedThemes, theme]);
@@ -229,6 +227,8 @@ export const CreateLyricModal: React.FC<CreateLyricModalProps> = ({
           description: description.trim() || undefined,
           visibility,
           selectedThemes,
+          creatorInfo,
+          existingLyric: editingLyric,
         });
 
         onSaveLyric(updatedLyric);
@@ -629,15 +629,15 @@ export const CreateLyricModal: React.FC<CreateLyricModalProps> = ({
           {/* Mood Selector */}
           <div>
             <label className="block text-xs font-semibold text-[var(--text-primary)] mb-2">
-              Select Primary Mood
+              Select Primary Mood <span className="font-normal text-[var(--text-secondary)]">(Optional)</span>
             </label>
             <div className="flex flex-wrap gap-2 max-h-28 overflow-y-auto p-1">
               {MOODS.map((m) => (
                 <button
                   key={m.id}
                   type="button"
-                  onClick={() => setMood(m.id)}
-                  className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-all ${
+                  onClick={() => setMood(mood === m.id ? ('' as MoodType) : (m.id as MoodType))}
+                  className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-all cursor-pointer ${
                     mood === m.id
                       ? 'bg-[#8B2F4A] text-white border-[#8B2F4A] dark:bg-[#E06C88] dark:text-zinc-950'
                       : 'bg-[var(--bg-muted)] text-[var(--text-secondary)] border-[var(--border-color)] hover:border-[#8B2F4A]/40'
@@ -653,7 +653,7 @@ export const CreateLyricModal: React.FC<CreateLyricModalProps> = ({
           {/* Theme Selector */}
           <div>
             <label className="block text-xs font-semibold text-[var(--text-primary)] mb-1">
-              Select Themes <span className="font-normal text-[var(--text-secondary)]">(Select up to 3)</span>
+              Select Themes <span className="font-normal text-[var(--text-secondary)]">(Optional, select up to 3)</span>
             </label>
             <div className="flex flex-wrap gap-1.5">
               {THEMES.map((t) => {
@@ -663,7 +663,7 @@ export const CreateLyricModal: React.FC<CreateLyricModalProps> = ({
                     key={t.id}
                     type="button"
                     onClick={() => toggleTheme(t.id)}
-                    className={`rounded-lg px-2.5 py-1 text-xs font-medium transition-colors ${
+                    className={`rounded-lg px-2.5 py-1 text-xs font-medium transition-colors cursor-pointer ${
                       isSel
                         ? 'bg-[#8B2F4A]/15 text-[#8B2F4A] font-semibold dark:bg-[#E06C88]/20 dark:text-[#E06C88]'
                         : 'bg-[var(--bg-muted)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'

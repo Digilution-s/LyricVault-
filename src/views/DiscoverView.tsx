@@ -493,7 +493,7 @@ export const DiscoverView: React.FC<DiscoverViewProps> = ({
       <div className="flex items-center justify-between text-xs font-medium text-[var(--text-secondary)] px-1">
         <span>
           {isLoading ? (
-            'Searching Supabase...'
+            'Searching Database...'
           ) : (
             <>
               Showing <strong className="text-[var(--text-primary)]">{lyricsList.length}</strong> of{' '}

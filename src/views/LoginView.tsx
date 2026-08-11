@@ -69,9 +69,12 @@ export const LoginView: React.FC<LoginViewProps> = ({ onSwitchToSignup, onSucces
       <div className="w-full max-w-md space-y-8 rounded-3xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-8 shadow-xl">
         {/* Brand Header */}
         <div className="text-center space-y-2">
-          <div className="inline-flex items-center justify-center p-3 rounded-2xl bg-[#8B2F4A]/10 text-[#8B2F4A] dark:text-[#E06C88]">
-            <Feather className="h-6 w-6" />
-          </div>
+          <img
+            src="/logo.svg"
+            alt="LyricVault Logo"
+            className="h-12 w-12 rounded-2xl object-cover mx-auto shadow-sm"
+            referrerPolicy="no-referrer"
+          />
           <h1 className="font-editorial text-3xl font-bold text-[var(--text-primary)]">
             {isResetMode ? 'Reset password' : 'Welcome back.'}
           </h1>

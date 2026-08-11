@@ -43,7 +43,7 @@ export interface Lyric {
   genre?: string;
   song_link?: string; // Optional URL to YouTube, Spotify, Apple Music, etc.
   song_links?: string[]; // Multiple URLs to streaming platforms
-  mood: MoodType;
+  mood?: MoodType | '';
   themes: ThemeType[];
   description?: string; // Optional personal commentary
   cover_url?: string; // Optional image artwork

@@ -12,7 +12,7 @@ interface NavbarProps {
   setSearchQuery: (val: string) => void;
   onOpenLogin?: () => void;
   onOpenSignup?: () => void;
-  onOpenAuthPrompt: (context?: 'save' | 'bookmark') => void;
+  onOpenAuthPrompt: (context?: 'save' | 'bookmark' | 'note') => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -41,33 +41,36 @@ export const Navbar: React.FC<NavbarProps> = ({
         <button
           id="brand-logo-button"
           onClick={() => setCurrentTab('home')}
-          className="group flex items-center gap-2.5 text-left transition-opacity hover:opacity-90 shrink-0 cursor-pointer"
+          className="group flex items-center gap-2 text-left transition-opacity hover:opacity-90 shrink-0 cursor-pointer"
         >
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#8B2F4A] text-white shadow-sm shadow-[#8B2F4A]/20 transition-transform group-hover:scale-105">
-            <Feather className="h-5 w-5" />
-          </div>
-          <span className="font-editorial text-2xl font-bold tracking-tight text-[var(--text-primary)]">
+          <img
+            src="/logo.svg"
+            alt="LyricVault Logo"
+            className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl object-cover shadow-xs transition-transform group-hover:scale-105"
+            referrerPolicy="no-referrer"
+          />
+          <span className={`font-editorial text-xl sm:text-2xl font-bold tracking-tight text-[var(--text-primary)] ${showSearchInput ? 'hidden sm:inline' : 'inline'}`}>
             LyricVault
           </span>
         </button>
 
         {/* Action Controls: Search & Save ONLY */}
-        <div className="flex items-center gap-2.5 sm:gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           {/* Quick Search */}
-          <div className="relative flex items-center">
+          <div className="relative flex items-center min-w-0">
             {showSearchInput ? (
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
                   setCurrentTab('discover');
                 }}
-                className="relative flex items-center"
+                className="relative flex items-center min-w-0"
               >
-                <Search className="absolute left-3 h-4 w-4 text-[var(--text-secondary)] pointer-events-none" />
+                <Search className="absolute left-2.5 h-3.5 w-3.5 text-[var(--text-secondary)] pointer-events-none" />
                 <input
                   id="navbar-search-input"
                   type="text"
-                  placeholder="Search lyrics, moods, artists..."
+                  placeholder="Search lyrics..."
                   value={searchQuery}
                   onChange={(e) => {
                     setSearchQuery(e.target.value);
@@ -82,7 +85,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     }
                   }}
                   autoFocus
-                  className="w-44 sm:w-64 rounded-full border border-[var(--border-color)] bg-[var(--bg-surface)] py-1.5 pl-9 pr-8 text-xs text-[var(--text-primary)] focus:border-[#8B2F4A] focus:outline-none focus:ring-1 focus:ring-[#8B2F4A] shadow-xs"
+                  className="w-28 xs:w-40 sm:w-64 rounded-full border border-[var(--border-color)] bg-[var(--bg-surface)] py-1.5 pl-8 pr-7 text-xs text-[var(--text-primary)] focus:border-[#8B2F4A] focus:outline-none focus:ring-1 focus:ring-[#8B2F4A] shadow-xs truncate"
                 />
                 <button
                   type="button"
@@ -90,7 +93,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     setShowSearchInput(false);
                     setSearchQuery('');
                   }}
-                  className="absolute right-2.5 h-4 w-4 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+                  className="absolute right-2 h-4 w-4 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer flex items-center justify-center"
                   title="Close Search"
                 >
                   <X className="h-3.5 w-3.5" />
@@ -105,7 +108,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     setCurrentTab('discover');
                   }
                 }}
-                className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border-color)] bg-[var(--bg-surface)] px-3.5 py-1.5 text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-muted)] transition-colors shadow-xs cursor-pointer"
+                className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border-color)] bg-[var(--bg-surface)] px-3 py-1.5 text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-muted)] transition-colors shadow-xs cursor-pointer"
                 title="Search Lyrics"
               >
                 <Search className="h-3.5 w-3.5 text-[#8B2F4A] dark:text-[#E06C88]" />
@@ -118,9 +121,9 @@ export const Navbar: React.FC<NavbarProps> = ({
           <button
             id="create-lyric-button-header"
             onClick={handleCreateClick}
-            className="inline-flex items-center gap-1.5 rounded-full bg-[#8B2F4A] px-4 py-1.5 text-xs font-bold text-white shadow-sm transition-all hover:bg-[#72253c] active:scale-95 dark:bg-[#E06C88] dark:text-zinc-950 dark:hover:bg-[#d65775] cursor-pointer shrink-0"
+            className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full bg-[#8B2F4A] px-3 sm:px-4 py-1.5 text-xs font-bold text-white shadow-sm transition-all hover:bg-[#72253c] active:scale-95 dark:bg-[#E06C88] dark:text-zinc-950 dark:hover:bg-[#d65775] cursor-pointer shrink-0"
           >
-            <PlusCircle className="h-4 w-4" />
+            <PlusCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             <span>Save</span>
           </button>
         </div>

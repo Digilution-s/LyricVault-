@@ -72,6 +72,7 @@ interface LyricReaderProps {
   onToggleSave?: (e: React.MouseEvent, lyricId: string) => void;
   onOpenAddToCollection?: (lyric: Lyric) => void;
   currentUserId?: string;
+  onOpenAuthPrompt?: (context?: 'save' | 'bookmark' | 'note') => void;
   showToast?: (message: string, type?: 'success' | 'error' | 'info') => void;
 }
 
@@ -129,6 +130,7 @@ export const LyricReader: React.FC<LyricReaderProps> = ({
   onToggleSave,
   onOpenAddToCollection,
   currentUserId,
+  onOpenAuthPrompt,
   showToast,
 }) => {
   // Saved reader preferences state
@@ -865,7 +867,7 @@ export const LyricReader: React.FC<LyricReaderProps> = ({
                       setIsAutoScrollPaused(true);
                     }
                     if (!currentUserId) {
-                      showToast?.('Please sign in to add personal notes to lyrics.', 'info');
+                      onOpenAuthPrompt?.('note');
                       return;
                     }
                     setActiveEditorSelection(sel);
@@ -1083,9 +1085,13 @@ export const LyricReader: React.FC<LyricReaderProps> = ({
               <button
                 id="reader-action-bookmark"
                 onClick={(e) => {
+                  if (!currentUserId) {
+                    onOpenAuthPrompt?.('bookmark');
+                    return;
+                  }
                   if (onToggleSave) onToggleSave(e, lyric.id);
                 }}
-                className="inline-flex items-center justify-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-full font-semibold transition-all active:scale-95 shrink-0 text-[11px] sm:text-xs min-h-[36px]"
+                className="inline-flex items-center justify-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-full font-semibold transition-all active:scale-95 shrink-0 text-[11px] sm:text-xs min-h-[36px] cursor-pointer"
                 style={{
                   backgroundColor: lyric.is_saved ? `${currentTheme.accent}20` : currentTheme.surface,
                   color: lyric.is_saved ? currentTheme.accent : currentTheme.text,
@@ -1104,8 +1110,14 @@ export const LyricReader: React.FC<LyricReaderProps> = ({
               {onOpenAddToCollection && (
                 <button
                   id="reader-action-collection"
-                  onClick={() => onOpenAddToCollection(lyric)}
-                  className="inline-flex items-center justify-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-full font-medium transition-all active:scale-95 shrink-0 text-[11px] sm:text-xs min-h-[36px]"
+                  onClick={() => {
+                    if (!currentUserId) {
+                      onOpenAuthPrompt?.('save');
+                      return;
+                    }
+                    onOpenAddToCollection(lyric);
+                  }}
+                  className="inline-flex items-center justify-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-full font-medium transition-all active:scale-95 shrink-0 text-[11px] sm:text-xs min-h-[36px] cursor-pointer"
                   style={{
                     backgroundColor: currentTheme.surface,
                     color: currentTheme.text,
@@ -1156,8 +1168,14 @@ export const LyricReader: React.FC<LyricReaderProps> = ({
               {/* Notes List Drawer Button */}
               <button
                 id="reader-action-notes"
-                onClick={() => setIsNotesSheetOpen(true)}
-                className="inline-flex items-center justify-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-full font-semibold transition-all active:scale-95 shrink-0 text-[11px] sm:text-xs min-h-[36px]"
+                onClick={() => {
+                  if (!currentUserId) {
+                    onOpenAuthPrompt?.('note');
+                    return;
+                  }
+                  setIsNotesSheetOpen(true);
+                }}
+                className="inline-flex items-center justify-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-full font-semibold transition-all active:scale-95 shrink-0 text-[11px] sm:text-xs min-h-[36px] cursor-pointer"
                 style={{
                   backgroundColor: annotations.length > 0 ? `${currentTheme.accent}20` : currentTheme.surface,
                   color: currentTheme.text,

@@ -7,7 +7,7 @@ interface MobileNavbarProps {
   setCurrentTab: (tab: string) => void;
   onOpenCreateModal: () => void;
   onOpenLogin: () => void;
-  onOpenAuthPrompt: (context?: 'save' | 'bookmark') => void;
+  onOpenAuthPrompt: (context?: 'save' | 'bookmark' | 'note') => void;
 }
 
 export const MobileNavbar: React.FC<MobileNavbarProps> = ({

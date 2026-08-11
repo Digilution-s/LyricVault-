@@ -107,14 +107,14 @@ export const ShareModal: React.FC<ShareModalProps> = ({
 
   const modalContent = (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fadeIn"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-xs animate-fadeIn"
       onClick={(e) => {
         e.stopPropagation();
         onClose();
       }}
     >
       <div
-        className="w-full max-w-md rounded-3xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-6 shadow-2xl space-y-6 relative animate-scaleUp text-[var(--text-primary)]"
+        className="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-3xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-5 sm:p-6 shadow-2xl space-y-5 relative animate-scaleUp text-[var(--text-primary)]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}

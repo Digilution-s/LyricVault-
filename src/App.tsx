@@ -163,7 +163,7 @@ function MainApp() {
     }
   }, [isDarkMode]);
 
-  const handleOpenAuthPrompt = (context: 'save' | 'bookmark' = 'bookmark') => {
+  const handleOpenAuthPrompt = (context: 'save' | 'bookmark' | 'note' = 'bookmark') => {
     setAuthPromptContext(context);
     setAuthPromptOpen(true);
   };
@@ -613,9 +613,10 @@ function MainApp() {
       {/* Footer Branding */}
       <footer className="border-t border-[var(--border-color)] bg-[var(--bg-surface)] py-10 px-4 text-center text-xs text-[var(--text-secondary)]">
         <div className="mx-auto max-w-7xl flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
+            <img src="/logo.svg" alt="LyricVault" className="h-6 w-6 rounded-lg object-cover" referrerPolicy="no-referrer" />
             <span className="font-editorial text-xl font-bold text-[var(--text-primary)]">LyricVault</span>
-            <span className="text-[10px] opacity-75">— Save the words that stay with you.</span>
+            <span className="text-[10px] opacity-75 hidden sm:inline">— Save the words that stay with you.</span>
           </div>
 
           <div className="flex items-center gap-4 text-[11px]">
@@ -685,6 +686,7 @@ function MainApp() {
             ? handleOpenDeleteLyric
             : undefined
         }
+        onOpenAuthPrompt={handleOpenAuthPrompt}
         showToast={showToast}
       />
 
@@ -697,6 +699,7 @@ function MainApp() {
         onToggleSave={handleToggleSave}
         onOpenAddToCollection={handleOpenAddToCollection}
         currentUserId={user?.id}
+        onOpenAuthPrompt={handleOpenAuthPrompt}
         showToast={showToast}
       />
 
