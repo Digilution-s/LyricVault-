@@ -13,18 +13,18 @@ export const MOODS: { id: MoodType; label: string; icon: string; color: string }
   { id: 'Hopeful', label: 'Hopeful', icon: '✨', color: 'bg-violet-100/80 text-violet-950 dark:bg-violet-950/40 dark:text-violet-300 border-violet-300 dark:border-violet-900/50' },
 ];
 
-export const THEMES: { id: ThemeType; label: string; count: number }[] = [
-  { id: 'Love', label: 'Love', count: 42 },
-  { id: 'Memories', label: 'Memories', count: 35 },
-  { id: 'Life', label: 'Life', count: 28 },
-  { id: 'Friendship', label: 'Friendship', count: 19 },
-  { id: 'Dreams', label: 'Dreams', count: 24 },
-  { id: 'Breakup' as ThemeType, label: 'Breakup', count: 31 },
-  { id: 'Motivation', label: 'Motivation', count: 15 },
-  { id: 'Freedom', label: 'Freedom', count: 22 },
-  { id: 'Night', label: 'Night', count: 38 },
-  { id: 'Rain', label: 'Rain', count: 17 },
-  { id: 'Solitude', label: 'Solitude', count: 29 },
+export const THEMES: { id: ThemeType; label: string }[] = [
+  { id: 'Love', label: 'Love' },
+  { id: 'Memories', label: 'Memories' },
+  { id: 'Life', label: 'Life' },
+  { id: 'Friendship', label: 'Friendship' },
+  { id: 'Dreams', label: 'Dreams' },
+  { id: 'Breakup' as ThemeType, label: 'Breakup' },
+  { id: 'Motivation', label: 'Motivation' },
+  { id: 'Freedom', label: 'Freedom' },
+  { id: 'Night', label: 'Night' },
+  { id: 'Rain', label: 'Rain' },
+  { id: 'Solitude', label: 'Solitude' },
 ];
 
 export const LANGUAGES = [

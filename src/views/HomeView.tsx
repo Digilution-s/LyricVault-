@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Hero } from '../components/Hero';
 import { LyricCard } from '../components/LyricCard';
 import { MoodChip } from '../components/MoodChip';
@@ -12,7 +12,7 @@ import { TrendingUp, Clock, Sparkles, FolderHeart, ArrowRight, Hash } from 'luci
 interface HomeViewProps {
   lyrics: Lyric[];
   collections: Collection[];
-  onSelectLyric: (lyric: Lyric) => void;
+  onSelectLyric: (lyric) => void;
   onSelectCreator?: (username: string) => void;
   onSelectCollection: (col: Collection) => void;
   onToggleLike: (e: React.MouseEvent, id: string) => void;
@@ -38,7 +38,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
   onNavigateTab,
   showToast,
 }) => {
-  // Homepage Moods specified in prompt: Love, Heartbreak, Happy, Sad, Nostalgic, Motivational, Peaceful, Late Night
+  // Homepage Moods
   const homeMoods: MoodType[] = [
     'Love',
     'Heartbreak',
@@ -50,20 +50,47 @@ export const HomeView: React.FC<HomeViewProps> = ({
     'Late Night',
   ];
 
-  // Homepage Themes specified in prompt: Love, Memories, Life, Friendship, Dreams, Breakup, Motivation, Freedom
-  const homeThemes: ThemeType[] = [
-    'Love',
-    'Memories',
-    'Life',
-    'Friendship',
-    'Dreams',
-    'Breakup' as ThemeType,
-    'Motivation',
-    'Freedom',
-  ];
-
   // Trending lyrics (public lyrics sorted by exact Trending Score formula)
   const publicLyrics = lyrics.filter((l) => l.visibility === 'public' || !l.visibility);
+
+  // Dynamic real-time theme counts calculated directly from available public lyrics in database
+  const availableThemes = useMemo(() => {
+    const countsMap = new Map<string, number>();
+
+    publicLyrics.forEach((lyric) => {
+      if (Array.isArray(lyric.themes)) {
+        lyric.themes.forEach((t) => {
+          if (t && typeof t === 'string') {
+            const trimmed = t.trim();
+            if (trimmed) {
+              countsMap.set(trimmed, (countsMap.get(trimmed) || 0) + 1);
+            }
+          }
+        });
+      }
+    });
+
+    // Extract only themes that exist with at least 1 lyric in the database
+    const themesList: { id: ThemeType; label: string; count: number }[] = [];
+
+    countsMap.forEach((count, themeId) => {
+      if (count > 0) {
+        const predefined = THEMES.find(
+          (t) => t.id.toLowerCase() === themeId.toLowerCase() || t.label.toLowerCase() === themeId.toLowerCase()
+        );
+        themesList.push({
+          id: (predefined?.id || themeId) as ThemeType,
+          label: predefined?.label || themeId,
+          count,
+        });
+      }
+    });
+
+    // Sort by count descending (most popular themes first)
+    themesList.sort((a, b) => b.count - a.count);
+
+    return themesList;
+  }, [publicLyrics]);
   const trendingLyrics = [...publicLyrics]
     .sort((a, b) => {
       const scoreA = calculateTrendingScore(a.likes_count, a.saves_count, a.created_at);
@@ -213,28 +240,32 @@ export const HomeView: React.FC<HomeViewProps> = ({
           </div>
         </section>
 
-        {/* Browse by Theme */}
-        <section className="space-y-6">
-          <div className="border-b border-[var(--border-color)] pb-4">
-            <div className="flex items-center gap-2 text-xs font-semibold text-[#8B2F4A] dark:text-[#E06C88] uppercase tracking-wider">
-              <Hash className="h-4 w-4" />
-              <span>Topics & Subjects</span>
+        {/* Browse by Theme: Only show themes with real data in database */}
+        {availableThemes.length > 0 && (
+          <section className="space-y-6">
+            <div className="border-b border-[var(--border-color)] pb-4">
+              <div className="flex items-center gap-2 text-xs font-semibold text-[#8B2F4A] dark:text-[#E06C88] uppercase tracking-wider">
+                <Hash className="h-4 w-4" />
+                <span>Topics & Subjects</span>
+              </div>
+              <h2 className="mt-1 font-editorial text-2xl font-bold tracking-tight text-[var(--text-primary)] sm:text-3xl">
+                Browse by Theme
+              </h2>
             </div>
-            <h2 className="mt-1 font-editorial text-2xl font-bold tracking-tight text-[var(--text-primary)] sm:text-3xl">
-              Browse by Theme
-            </h2>
-          </div>
 
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
-            {homeThemes.map((tId) => (
-              <ThemeCard
-                key={tId}
-                themeId={tId}
-                onClick={(t) => onNavigateTab('discover', undefined, t)}
-              />
-            ))}
-          </div>
-        </section>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+              {availableThemes.map((theme) => (
+                <ThemeCard
+                  key={theme.id}
+                  themeId={theme.id}
+                  label={theme.label}
+                  count={theme.count}
+                  onClick={(t) => onNavigateTab('discover', undefined, t)}
+                />
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Popular Collections */}
         <section className="space-y-6">
