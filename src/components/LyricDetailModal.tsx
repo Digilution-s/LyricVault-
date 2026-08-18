@@ -324,12 +324,12 @@ export const LyricDetailModal: React.FC<LyricDetailModalProps> = ({
               </div>
             )}
 
-            {/* Streaming Links (Compact Chips) */}
+            {/* Streaming Links (Compact, uniform platform pills) */}
             {(() => {
               const allLinks = parseSongLinks(lyric.song_link, lyric.song_links);
               if (allLinks.length === 0) return null;
               return (
-                <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
                   {allLinks.map((url, idx) => {
                     const platform = detectMusicPlatform(url);
                     return (
@@ -339,12 +339,12 @@ export const LyricDetailModal: React.FC<LyricDetailModalProps> = ({
                         href={url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-semibold transition-all ${platform.brandBg}`}
+                        className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[11px] font-semibold transition-all shadow-xs hover:opacity-95 active:scale-95 ${platform.brandBg}`}
                         title={platform.label}
                       >
-                        <Music className="h-2.5 w-2.5 shrink-0" />
-                        <span>{platform.label}</span>
-                        <ExternalLink className="h-2.5 w-2.5 opacity-70" />
+                        <Music className="h-3 w-3 shrink-0" />
+                        <span>{platform.name}</span>
+                        <ExternalLink className="h-2.5 w-2.5 opacity-75 shrink-0" />
                       </a>
                     );
                   })}
@@ -497,22 +497,29 @@ export const LyricDetailModal: React.FC<LyricDetailModalProps> = ({
         </div>
 
         {/* Bottom Action Footer: Minimalist, clean bar with accessible icon buttons */}
-        <div className="flex items-center justify-between gap-2 px-4 sm:px-6 py-2.5 sm:py-3 border-t border-[var(--border-color)]/60 bg-[var(--bg-surface)] pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] shrink-0">
-          <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+        {/* Action Footer (Unified bottom bar) */}
+        <div className="flex flex-wrap items-center justify-between gap-2.5 px-4 sm:px-6 py-3 border-t border-[var(--border-color)]/60 bg-[var(--bg-surface)] pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] shrink-0">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
             {/* Like Button */}
             <button
               id={`modal-like-button-${lyric.id}`}
-              onClick={(e) => onToggleLike(e, lyric.id)}
-              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
+              onClick={(e) => {
+                if (!isAuthenticated) {
+                  onOpenAuthPrompt?.('like');
+                  return;
+                }
+                onToggleLike(e, lyric.id);
+              }}
+              className={`inline-flex h-8.5 items-center gap-1.5 rounded-xl px-3 text-xs font-semibold transition-all cursor-pointer active:scale-95 ${
                 lyric.is_liked
-                  ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/50 dark:text-rose-300'
-                  : 'bg-[var(--bg-muted)] text-[var(--text-primary)] hover:text-rose-600'
+                  ? 'bg-rose-50 text-rose-600 border border-rose-200 dark:bg-rose-950/50 dark:text-rose-300 dark:border-rose-900/50'
+                  : 'bg-[var(--bg-muted)] text-[var(--text-primary)] hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950/20'
               }`}
               title="Like"
               aria-label="Like"
             >
               <Heart className={`h-3.5 w-3.5 ${lyric.is_liked ? 'fill-rose-500 text-rose-500' : ''}`} />
-              <span className="text-[11px] font-medium">{lyric.likes_count ?? 0}</span>
+              <span className="text-[11px] font-semibold">{lyric.likes_count ?? 0}</span>
             </button>
 
             {/* Bookmark / Save Button */}
@@ -525,16 +532,16 @@ export const LyricDetailModal: React.FC<LyricDetailModalProps> = ({
                 }
                 onToggleSave(e, lyric.id);
               }}
-              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
+              className={`inline-flex h-8.5 items-center gap-1.5 rounded-xl px-3 text-xs font-semibold transition-all cursor-pointer active:scale-95 ${
                 lyric.is_saved
-                  ? 'bg-[#8B2F4A] text-white dark:bg-[#E06C88] dark:text-zinc-950'
+                  ? 'bg-[#8B2F4A] text-white dark:bg-[#E06C88] dark:text-zinc-950 shadow-xs'
                   : 'bg-[var(--bg-muted)] text-[var(--text-primary)] hover:bg-[#8B2F4A]/10 hover:text-[#8B2F4A]'
               }`}
               title={lyric.is_saved ? 'Saved in Vault' : 'Save to Vault'}
               aria-label="Bookmark"
             >
               <Bookmark className={`h-3.5 w-3.5 ${lyric.is_saved ? 'fill-current' : ''}`} />
-              <span className="text-[11px] font-medium">{lyric.saves_count ?? 0}</span>
+              <span className="text-[11px] font-semibold">{lyric.saves_count ?? 0}</span>
             </button>
 
             {/* Add to Collection */}
@@ -548,11 +555,12 @@ export const LyricDetailModal: React.FC<LyricDetailModalProps> = ({
                   }
                   onOpenAddToCollection(lyric);
                 }}
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--bg-muted)] text-[var(--text-primary)] hover:text-[#8B2F4A] dark:hover:text-[#E06C88] transition-colors cursor-pointer"
+                className="inline-flex h-8.5 items-center gap-1.5 rounded-xl bg-[var(--bg-muted)] px-3 text-xs font-semibold text-[var(--text-primary)] hover:text-[#8B2F4A] dark:hover:text-[#E06C88] transition-all cursor-pointer active:scale-95"
                 title="Add to Collection"
                 aria-label="Add to Collection"
               >
-                <FolderPlus className="h-3.5 w-3.5" />
+                <FolderPlus className="h-3.5 w-3.5 text-[#8B2F4A] dark:text-[#E06C88]" />
+                <span className="text-[11px] font-semibold hidden xs:inline">Collection</span>
               </button>
             )}
 
@@ -566,7 +574,7 @@ export const LyricDetailModal: React.FC<LyricDetailModalProps> = ({
                 }
                 setIsNotesSheetOpen(true);
               }}
-              className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1.5 text-xs font-medium transition-colors cursor-pointer ${
+              className={`inline-flex h-8.5 items-center gap-1.5 rounded-xl px-3 text-xs font-semibold transition-all cursor-pointer active:scale-95 ${
                 annotations.length > 0
                   ? 'bg-[#8B2F4A]/10 text-[#8B2F4A] dark:bg-[#E06C88]/20 dark:text-[#E06C88]'
                   : 'bg-[var(--bg-muted)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
@@ -575,7 +583,7 @@ export const LyricDetailModal: React.FC<LyricDetailModalProps> = ({
               aria-label="Personal Notes"
             >
               <Sparkles className="h-3.5 w-3.5" />
-              <span className="text-[11px]">{annotations.length}</span>
+              <span className="text-[11px] font-semibold">{annotations.length > 0 ? annotations.length : 'Notes'}</span>
             </button>
 
             {/* Create Card Button (Bottom) */}
@@ -585,29 +593,29 @@ export const LyricDetailModal: React.FC<LyricDetailModalProps> = ({
                 setCardStudioSelectedText('');
                 setIsCardStudioOpen(true);
               }}
-              className="inline-flex items-center gap-1.5 rounded-full px-2.5 sm:px-3 py-1.5 text-xs font-semibold bg-[#8B2F4A]/10 text-[#8B2F4A] hover:bg-[#8B2F4A] hover:text-white dark:bg-[#E06C88]/20 dark:text-[#E06C88] dark:hover:bg-[#E06C88] dark:hover:text-zinc-950 transition-all cursor-pointer"
+              className="inline-flex h-8.5 items-center gap-1.5 rounded-xl px-3 text-xs font-semibold bg-[#8B2F4A] text-white hover:bg-[#72253c] dark:bg-[#E06C88] dark:text-zinc-950 transition-all cursor-pointer active:scale-95 shadow-xs"
               title="Create Lyric Card"
               aria-label="Create Lyric Card"
             >
               <Sparkles className="h-3.5 w-3.5" />
-              <span className="text-[11px] font-medium">Card</span>
+              <span className="text-[11px] font-semibold">Card</span>
             </button>
 
             {/* Share Button (Bottom) */}
             <button
               id={`modal-share-bottom-${lyric.id}`}
               onClick={handleShare}
-              className="inline-flex items-center gap-1.5 rounded-full px-2.5 sm:px-3 py-1.5 text-xs font-semibold bg-[var(--bg-muted)] text-[var(--text-primary)] hover:bg-[#8B2F4A]/10 hover:text-[#8B2F4A] dark:hover:text-[#E06C88] transition-colors cursor-pointer"
+              className="inline-flex h-8.5 items-center gap-1.5 rounded-xl px-3 text-xs font-semibold bg-[var(--bg-muted)] text-[var(--text-primary)] hover:bg-[#8B2F4A]/10 hover:text-[#8B2F4A] dark:hover:text-[#E06C88] transition-all cursor-pointer active:scale-95"
               title="Share Lyric"
               aria-label="Share"
             >
-              <Share2 className="h-3.5 w-3.5" />
-              <span className="text-[11px] font-medium">Share</span>
+              <Share2 className="h-3.5 w-3.5 text-[#8B2F4A] dark:text-[#E06C88]" />
+              <span className="text-[11px] font-semibold">Share</span>
             </button>
           </div>
 
           {/* Right Action Icons (Copy, Edit, Delete) */}
-          <div className="flex items-center gap-1 shrink-0">
+          <div className="flex items-center gap-1.5 shrink-0">
             {/* Edit Lyric (Owner) */}
             {onEditLyric && (
               <button
@@ -616,7 +624,7 @@ export const LyricDetailModal: React.FC<LyricDetailModalProps> = ({
                   onClose();
                   onEditLyric(lyric);
                 }}
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--bg-muted)] text-[var(--text-secondary)] hover:text-[#8B2F4A] dark:hover:text-[#E06C88] transition-colors cursor-pointer"
+                className="flex h-8.5 w-8.5 items-center justify-center rounded-xl bg-[var(--bg-muted)] text-[var(--text-secondary)] hover:text-[#8B2F4A] dark:hover:text-[#E06C88] transition-colors cursor-pointer active:scale-95"
                 title="Edit Lyric"
                 aria-label="Edit"
               >
@@ -632,7 +640,7 @@ export const LyricDetailModal: React.FC<LyricDetailModalProps> = ({
                   onClose();
                   onDeleteLyric(lyric);
                 }}
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400 hover:bg-rose-500/20 transition-colors cursor-pointer"
+                className="flex h-8.5 w-8.5 items-center justify-center rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400 hover:bg-rose-500/20 transition-colors cursor-pointer active:scale-95"
                 title="Delete Lyric"
                 aria-label="Delete"
               >
@@ -644,7 +652,7 @@ export const LyricDetailModal: React.FC<LyricDetailModalProps> = ({
             <button
               id="modal-copy-text-button"
               onClick={handleCopyText}
-              className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--bg-muted)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+              className="flex h-8.5 w-8.5 items-center justify-center rounded-xl bg-[var(--bg-muted)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer active:scale-95"
               title="Copy Text"
               aria-label="Copy"
             >

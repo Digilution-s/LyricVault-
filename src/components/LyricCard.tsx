@@ -174,12 +174,12 @@ export const LyricCard: React.FC<LyricCardProps> = ({
         )}
 
         {/* Interaction Buttons */}
-        <div className="flex items-center gap-0.5 ml-auto" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center gap-1 ml-auto" onClick={(e) => e.stopPropagation()}>
           {/* Like Button */}
           <button
             id={`like-button-${lyric.id}`}
             onClick={(e) => onToggleLike(e, lyric.id)}
-            className={`flex items-center gap-1 rounded-full px-2 py-1 text-xs transition-colors shrink-0 ${
+            className={`inline-flex h-7 items-center gap-1 rounded-lg px-2 text-xs font-semibold transition-all active:scale-95 shrink-0 cursor-pointer ${
               lyric.is_liked
                 ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400'
                 : 'text-[var(--text-secondary)] hover:bg-[var(--bg-muted)] hover:text-rose-600'
@@ -188,18 +188,18 @@ export const LyricCard: React.FC<LyricCardProps> = ({
             aria-label="Like"
           >
             <Heart
-              className={`h-3.5 w-3.5 transition-transform active:scale-125 ${
+              className={`h-3.5 w-3.5 transition-transform ${
                 lyric.is_liked ? 'fill-rose-500 text-rose-500' : ''
               }`}
             />
-            <span className="font-medium text-[11px]">{lyric.likes_count ?? 0}</span>
+            <span className="font-semibold text-[11px]">{lyric.likes_count ?? 0}</span>
           </button>
 
           {/* Bookmark / Save Button */}
           <button
             id={`bookmark-button-${lyric.id}`}
             onClick={(e) => onToggleSave(e, lyric.id)}
-            className={`flex items-center gap-1 rounded-full px-2 py-1 text-xs transition-colors shrink-0 ${
+            className={`inline-flex h-7 items-center gap-1 rounded-lg px-2 text-xs font-semibold transition-all active:scale-95 shrink-0 cursor-pointer ${
               lyric.is_saved
                 ? 'bg-[#8B2F4A]/10 text-[#8B2F4A] dark:bg-[#E06C88]/20 dark:text-[#E06C88]'
                 : 'text-[var(--text-secondary)] hover:bg-[var(--bg-muted)] hover:text-[#8B2F4A]'
@@ -208,11 +208,11 @@ export const LyricCard: React.FC<LyricCardProps> = ({
             aria-label="Save"
           >
             <Bookmark
-              className={`h-3.5 w-3.5 transition-transform active:scale-125 ${
+              className={`h-3.5 w-3.5 transition-transform ${
                 lyric.is_saved ? 'fill-[#8B2F4A] text-[#8B2F4A] dark:fill-[#E06C88] dark:text-[#E06C88]' : ''
               }`}
             />
-            <span className="font-medium text-[11px]">{lyric.saves_count ?? 0}</span>
+            <span className="font-semibold text-[11px]">{lyric.saves_count ?? 0}</span>
           </button>
 
           {/* Reading Mode Button */}
@@ -223,7 +223,7 @@ export const LyricCard: React.FC<LyricCardProps> = ({
                 e.stopPropagation();
                 onOpenReadingMode(lyric);
               }}
-              className="flex h-7 w-7 items-center justify-center rounded-full text-xs text-[var(--text-secondary)] hover:bg-[#8B2F4A]/10 hover:text-[#8B2F4A] dark:hover:bg-[#E06C88]/20 dark:hover:text-[#E06C88] transition-all active:scale-90 shrink-0 cursor-pointer"
+              className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-xs text-[var(--text-secondary)] hover:bg-[#8B2F4A]/10 hover:text-[#8B2F4A] dark:hover:bg-[#E06C88]/20 dark:hover:text-[#E06C88] transition-all active:scale-90 shrink-0 cursor-pointer"
               title="Enter Reading Mode"
               aria-label="Reading Mode"
             >
@@ -239,7 +239,7 @@ export const LyricCard: React.FC<LyricCardProps> = ({
                 e.stopPropagation();
                 onOpenAddToCollection(lyric);
               }}
-              className="flex h-7 w-7 items-center justify-center rounded-full text-xs text-[var(--text-secondary)] hover:bg-[var(--bg-muted)] hover:text-[#8B2F4A] dark:hover:text-[#E06C88] transition-all active:scale-90 shrink-0 cursor-pointer"
+              className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-xs text-[var(--text-secondary)] hover:bg-[var(--bg-muted)] hover:text-[#8B2F4A] dark:hover:text-[#E06C88] transition-all active:scale-90 shrink-0 cursor-pointer"
               title="Add to Collection"
               aria-label="Add to Collection"
             >
@@ -254,7 +254,7 @@ export const LyricCard: React.FC<LyricCardProps> = ({
               e.stopPropagation();
               setIsCardStudioOpen(true);
             }}
-            className="flex h-7 w-7 items-center justify-center rounded-full text-xs text-[var(--text-secondary)] hover:bg-[#8B2F4A]/10 hover:text-[#8B2F4A] dark:hover:bg-[#E06C88]/20 dark:hover:text-[#E06C88] transition-all active:scale-90 shrink-0 cursor-pointer"
+            className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-xs text-[var(--text-secondary)] hover:bg-[#8B2F4A]/10 hover:text-[#8B2F4A] dark:hover:bg-[#E06C88]/20 dark:hover:text-[#E06C88] transition-all active:scale-90 shrink-0 cursor-pointer"
             title="Create Lyric Card"
             aria-label="Create Card"
           >
@@ -268,7 +268,7 @@ export const LyricCard: React.FC<LyricCardProps> = ({
               e.stopPropagation();
               setIsShareOpen(true);
             }}
-            className="flex h-7 w-7 items-center justify-center rounded-full text-xs text-[var(--text-secondary)] hover:bg-[var(--bg-muted)] hover:text-[#8B2F4A] dark:hover:text-[#E06C88] transition-all active:scale-90 shrink-0 cursor-pointer"
+            className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-xs text-[var(--text-secondary)] hover:bg-[var(--bg-muted)] hover:text-[#8B2F4A] dark:hover:text-[#E06C88] transition-all active:scale-90 shrink-0 cursor-pointer"
             title="Share Lyric"
             aria-label="Share"
           >
@@ -283,7 +283,7 @@ export const LyricCard: React.FC<LyricCardProps> = ({
                 e.stopPropagation();
                 onEditLyric(lyric);
               }}
-              className="flex h-7 w-7 items-center justify-center rounded-full text-xs text-[var(--text-secondary)] hover:bg-[var(--bg-muted)] hover:text-[#8B2F4A] dark:hover:text-[#E06C88] transition-all active:scale-90 shrink-0 cursor-pointer"
+              className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-xs text-[var(--text-secondary)] hover:bg-[var(--bg-muted)] hover:text-[#8B2F4A] dark:hover:text-[#E06C88] transition-all active:scale-90 shrink-0 cursor-pointer"
               title="Edit Lyric"
               aria-label="Edit"
             >
@@ -299,7 +299,7 @@ export const LyricCard: React.FC<LyricCardProps> = ({
                 e.stopPropagation();
                 onDeleteLyric(lyric);
               }}
-              className="flex h-7 w-7 items-center justify-center rounded-full text-xs text-rose-500 hover:bg-rose-500/10 transition-all active:scale-90 shrink-0 cursor-pointer"
+              className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-xs text-rose-500 hover:bg-rose-500/10 transition-all active:scale-90 shrink-0 cursor-pointer"
               title="Delete Lyric"
               aria-label="Delete"
             >
@@ -315,7 +315,7 @@ export const LyricCard: React.FC<LyricCardProps> = ({
                 e.stopPropagation();
                 onRemoveFromCollection(lyric.id);
               }}
-              className="flex h-7 w-7 items-center justify-center rounded-full text-xs text-rose-500/80 hover:bg-rose-500/10 hover:text-rose-600 transition-colors shrink-0 cursor-pointer"
+              className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-xs text-rose-500/80 hover:bg-rose-500/10 hover:text-rose-600 transition-colors shrink-0 cursor-pointer"
               title="Remove from this collection"
               aria-label="Remove"
             >
