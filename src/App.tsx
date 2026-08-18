@@ -71,9 +71,9 @@ function MainApp() {
   // Synchronize route from URL on mount & back/forward navigation
   useEffect(() => {
     const handleUrlRouting = () => {
-      const path = window.location.pathname;
-      const profileMatch = path.match(/^\/profile\/@?([^/]+)/);
-      const lyricMatch = path.match(/^\/lyrics\/([^/]+)/);
+      const path = window.location.pathname.replace(/\/+$/, '');
+      const profileMatch = path.match(/^\/(?:profile|u|creator)\/@?([^/]+)/i);
+      const lyricMatch = path.match(/^\/(?:lyrics|lyric|public\/lyric)\/([^/]+)/i);
 
       if (profileMatch && profileMatch[1]) {
         setViewingUsername(profileMatch[1]);
@@ -81,6 +81,16 @@ function MainApp() {
       } else if (lyricMatch && lyricMatch[1]) {
         setViewingLyricId(lyricMatch[1]);
         setCurrentTab('public_lyric');
+      } else if (path === '/login') {
+        setCurrentTab('login');
+      } else if (path === '/signup') {
+        setCurrentTab('signup');
+      } else if (path === '/discover') {
+        setCurrentTab('discover');
+      } else if (path === '/collections') {
+        setCurrentTab('collections');
+      } else if (path === '/library') {
+        setCurrentTab('library');
       }
     };
 
@@ -501,7 +511,10 @@ function MainApp() {
   // Handle Tab Navigation with Optional Filters
   const handleNavigateTab = (tab: string, moodFilter?: MoodType, themeFilter?: ThemeType) => {
     setCurrentTab(tab);
-    if (tab !== 'public_profile' && window.location.pathname.startsWith('/profile/')) {
+    if (
+      (tab !== 'public_profile' && window.location.pathname.startsWith('/profile/')) ||
+      (tab !== 'public_lyric' && (window.location.pathname.startsWith('/lyrics/') || window.location.pathname.startsWith('/lyric/')))
+    ) {
       window.history.pushState(null, '', '/');
     }
     if (moodFilter) setActiveMoodFilter(moodFilter);
