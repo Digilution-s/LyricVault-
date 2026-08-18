@@ -5,6 +5,7 @@ import { MOODS } from '../data/demoData';
 import { CreatorLink } from './CreatorLink';
 import { detectMusicPlatform, parseSongLinks } from '../utils/musicPlatform';
 import { ShareModal } from './ShareModal';
+import { LyricCardStudio } from './LyricCardStudio';
 
 interface LyricCardProps {
   lyric: Lyric;
@@ -32,6 +33,7 @@ export const LyricCard: React.FC<LyricCardProps> = ({
   onDeleteLyric,
 }) => {
   const [isShareOpen, setIsShareOpen] = useState(false);
+  const [isCardStudioOpen, setIsCardStudioOpen] = useState(false);
   const moodObj = MOODS.find((m) => m.id === lyric.mood);
 
   // Format short preview (first 2-3 lines max)
@@ -245,6 +247,20 @@ export const LyricCard: React.FC<LyricCardProps> = ({
             </button>
           )}
 
+          {/* Create Card Button */}
+          <button
+            id={`card-studio-button-${lyric.id}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsCardStudioOpen(true);
+            }}
+            className="flex h-7 w-7 items-center justify-center rounded-full text-xs text-[var(--text-secondary)] hover:bg-[#8B2F4A]/10 hover:text-[#8B2F4A] dark:hover:bg-[#E06C88]/20 dark:hover:text-[#E06C88] transition-all active:scale-90 shrink-0 cursor-pointer"
+            title="Create Lyric Card"
+            aria-label="Create Card"
+          >
+            <Sparkles className="h-3.5 w-3.5 text-[#8B2F4A] dark:text-[#E06C88]" />
+          </button>
+
           {/* Share Button */}
           <button
             id={`share-lyric-button-${lyric.id}`}
@@ -313,6 +329,12 @@ export const LyricCard: React.FC<LyricCardProps> = ({
         lyric={lyric}
         isOpen={isShareOpen}
         onClose={() => setIsShareOpen(false)}
+      />
+
+      <LyricCardStudio
+        isOpen={isCardStudioOpen}
+        onClose={() => setIsCardStudioOpen(false)}
+        lyric={lyric}
       />
     </div>
   );

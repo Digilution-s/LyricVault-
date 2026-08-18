@@ -1276,7 +1276,7 @@ export const LyricCardStudio: React.FC<LyricCardStudioProps> = ({
       </div>
 
       {/* 3. MOBILE CONTROLS & BOTTOM STRIP (Mobile Only) */}
-      <div className="md:hidden border-t border-zinc-800/80 bg-zinc-950 p-3 flex flex-col gap-3 shrink-0">
+      <div className="md:hidden border-t border-zinc-800/80 bg-zinc-950 p-3.5 pb-6 sm:pb-4 flex flex-col gap-3 shrink-0 z-30">
         
         {/* Templates Visual Thumbnails Strip */}
         <div className="w-full">

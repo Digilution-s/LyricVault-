@@ -334,79 +334,83 @@ export const PublicLyricView: React.FC<PublicLyricViewProps> = ({
             </div>
           )}
 
-          {/* Right: Actions (Like, Bookmark, Collection, Share) */}
-          <div className="flex items-center gap-3">
-            <button
-              id="public-lyric-like-button"
-              type="button"
-              onClick={handleLikeClick}
-              className={`inline-flex items-center gap-2 rounded-2xl px-4 py-2.5 text-xs font-semibold border transition-all ${
-                lyric.is_liked
-                  ? 'bg-rose-50 text-rose-600 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-900/50'
-                  : 'bg-[var(--bg-muted)]/60 text-[var(--text-primary)] border-[var(--border-color)] hover:border-rose-400 hover:text-rose-600'
-              }`}
-              title={`Like (${lyric.likes_count ?? 0})`}
-            >
-              <Heart className={`h-4 w-4 ${lyric.is_liked ? 'fill-rose-500 text-rose-500' : ''}`} />
-              <span>{lyric.likes_count ?? 0}</span>
-            </button>
-
-            <button
-              id="public-lyric-bookmark-button"
-              type="button"
-              onClick={handleBookmarkClick}
-              className={`inline-flex items-center gap-2 rounded-2xl px-4 py-2.5 text-xs font-semibold border transition-all ${
-                lyric.is_saved
-                  ? 'bg-[#8B2F4A] text-white border-[#8B2F4A]'
-                  : 'bg-[var(--bg-muted)]/60 text-[var(--text-primary)] border-[var(--border-color)] hover:border-[#8B2F4A]'
-              }`}
-              title={`Save to Vault (${lyric.saves_count ?? 0})`}
-            >
-              <Bookmark className={`h-4 w-4 ${lyric.is_saved ? 'fill-current' : ''}`} />
-              <span>{lyric.saves_count ?? 0}</span>
-            </button>
-
-            <button
-              id="public-lyric-collection-button"
-              type="button"
-              onClick={handleOpenCollectionClick}
-              className="inline-flex items-center gap-2 rounded-2xl bg-[var(--bg-muted)]/60 px-4 py-2.5 text-xs font-semibold text-[var(--text-primary)] border border-[var(--border-color)] hover:border-[#8B2F4A] transition-all"
-            >
-              <FolderPlus className="h-4 w-4 text-[#8B2F4A]" />
-              <span className="hidden sm:inline">Add to Collection</span>
-            </button>
-
-            {onOpenReadingMode && lyric && (
+          {/* Right: Actions (Like, Bookmark, Collection, Reading Mode, Create Card, Share) */}
+          <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 w-full sm:w-auto">
+            <div className="flex items-center gap-2 flex-wrap">
               <button
-                id="public-lyric-reading-mode-button"
+                id="public-lyric-like-button"
                 type="button"
-                onClick={() => onOpenReadingMode(lyric)}
-                className="inline-flex items-center gap-2 rounded-2xl bg-[#8B2F4A]/10 text-[#8B2F4A] hover:bg-[#8B2F4A] hover:text-white dark:bg-[#E06C88]/20 dark:text-[#E06C88] dark:hover:bg-[#E06C88] dark:hover:text-zinc-950 px-4 py-2.5 text-xs font-bold border border-[#8B2F4A]/30 transition-all"
+                onClick={handleLikeClick}
+                className={`inline-flex items-center gap-2 rounded-2xl px-3.5 sm:px-4 py-2.5 text-xs font-semibold border transition-all cursor-pointer ${
+                  lyric.is_liked
+                    ? 'bg-rose-50 text-rose-600 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-900/50'
+                    : 'bg-[var(--bg-muted)]/60 text-[var(--text-primary)] border-[var(--border-color)] hover:border-rose-400 hover:text-rose-600'
+                }`}
+                title={`Like (${lyric.likes_count ?? 0})`}
               >
-                <BookOpen className="h-4 w-4" />
-                <span>Reading Mode</span>
+                <Heart className={`h-4 w-4 ${lyric.is_liked ? 'fill-rose-500 text-rose-500' : ''}`} />
+                <span>{lyric.likes_count ?? 0}</span>
               </button>
-            )}
 
-            <button
-              id="public-lyric-create-card-button"
-              type="button"
-              onClick={() => setIsCardStudioOpen(true)}
-              className="inline-flex items-center gap-2 rounded-2xl bg-[#8B2F4A] text-white hover:bg-[#72253c] dark:bg-[#E06C88] dark:text-zinc-950 px-4 py-2.5 text-xs font-bold shadow-sm transition-all"
-            >
-              <Sparkles className="h-4 w-4" />
-              <span>Create Card</span>
-            </button>
+              <button
+                id="public-lyric-bookmark-button"
+                type="button"
+                onClick={handleBookmarkClick}
+                className={`inline-flex items-center gap-2 rounded-2xl px-3.5 sm:px-4 py-2.5 text-xs font-semibold border transition-all cursor-pointer ${
+                  lyric.is_saved
+                    ? 'bg-[#8B2F4A] text-white border-[#8B2F4A]'
+                    : 'bg-[var(--bg-muted)]/60 text-[var(--text-primary)] border-[var(--border-color)] hover:border-[#8B2F4A]'
+                }`}
+                title={`Save to Vault (${lyric.saves_count ?? 0})`}
+              >
+                <Bookmark className={`h-4 w-4 ${lyric.is_saved ? 'fill-current' : ''}`} />
+                <span>{lyric.saves_count ?? 0}</span>
+              </button>
 
-            <button
-              id="public-lyric-share-button"
-              type="button"
-              onClick={() => setIsShareOpen(true)}
-              className="inline-flex items-center gap-2 rounded-2xl bg-[var(--bg-muted)]/60 px-4 py-2.5 text-xs font-semibold text-[var(--text-primary)] border border-[var(--border-color)] hover:border-[#8B2F4A] transition-all"
-            >
-              <Share2 className="h-4 w-4 text-[#8B2F4A]" />
-              <span>Share</span>
-            </button>
+              <button
+                id="public-lyric-collection-button"
+                type="button"
+                onClick={handleOpenCollectionClick}
+                className="inline-flex items-center gap-2 rounded-2xl bg-[var(--bg-muted)]/60 px-3.5 sm:px-4 py-2.5 text-xs font-semibold text-[var(--text-primary)] border border-[var(--border-color)] hover:border-[#8B2F4A] transition-all cursor-pointer"
+              >
+                <FolderPlus className="h-4 w-4 text-[#8B2F4A] dark:text-[#E06C88]" />
+                <span className="hidden xs:inline sm:inline">Collection</span>
+              </button>
+            </div>
+
+            <div className="flex items-center gap-2 w-full sm:w-auto pt-1 sm:pt-0">
+              {onOpenReadingMode && lyric && (
+                <button
+                  id="public-lyric-reading-mode-button"
+                  type="button"
+                  onClick={() => onOpenReadingMode(lyric)}
+                  className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 rounded-2xl bg-[#8B2F4A]/10 text-[#8B2F4A] hover:bg-[#8B2F4A] hover:text-white dark:bg-[#E06C88]/20 dark:text-[#E06C88] dark:hover:bg-[#E06C88] dark:hover:text-zinc-950 px-3.5 sm:px-4 py-2.5 text-xs font-bold border border-[#8B2F4A]/30 transition-all cursor-pointer"
+                >
+                  <BookOpen className="h-4 w-4" />
+                  <span>Reading Mode</span>
+                </button>
+              )}
+
+              <button
+                id="public-lyric-create-card-button"
+                type="button"
+                onClick={() => setIsCardStudioOpen(true)}
+                className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 rounded-2xl bg-[#8B2F4A] text-white hover:bg-[#72253c] dark:bg-[#E06C88] dark:text-zinc-950 px-4 sm:px-5 py-2.5 text-xs font-bold shadow-sm transition-all cursor-pointer active:scale-95"
+              >
+                <Sparkles className="h-4 w-4" />
+                <span>Create Card</span>
+              </button>
+
+              <button
+                id="public-lyric-share-button"
+                type="button"
+                onClick={() => setIsShareOpen(true)}
+                className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 rounded-2xl bg-[var(--bg-muted)]/80 hover:bg-[#8B2F4A]/10 text-[var(--text-primary)] hover:text-[#8B2F4A] dark:hover:text-[#E06C88] px-3.5 sm:px-4 py-2.5 text-xs font-bold border border-[var(--border-color)] hover:border-[#8B2F4A] transition-all cursor-pointer active:scale-95"
+              >
+                <Share2 className="h-4 w-4 text-[#8B2F4A] dark:text-[#E06C88]" />
+                <span>Share</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>

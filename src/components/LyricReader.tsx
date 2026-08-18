@@ -1393,7 +1393,7 @@ export const LyricReader: React.FC<LyricReaderProps> = ({
             </div>
           ) : (
             /* STANDARD EDITORIAL ACTION BAR - ICON SYMBOLS WITH AUTO-SCROLL IN THE MIDDLE */
-            <div className="max-w-lg sm:max-w-2xl mx-auto w-full flex items-center justify-between sm:justify-center gap-1 sm:gap-2 py-0.5 px-0.5">
+            <div className="max-w-lg sm:max-w-2xl mx-auto w-full flex items-center justify-between sm:justify-center gap-1 sm:gap-2 py-0.5 px-1 overflow-x-auto no-scrollbar">
               {/* 1. Bookmark / Save to Vault */}
               <button
                 id="reader-action-bookmark"

@@ -577,6 +577,33 @@ export const LyricDetailModal: React.FC<LyricDetailModalProps> = ({
               <Sparkles className="h-3.5 w-3.5" />
               <span className="text-[11px]">{annotations.length}</span>
             </button>
+
+            {/* Create Card Button (Bottom) */}
+            <button
+              id={`modal-create-card-bottom-${lyric.id}`}
+              onClick={() => {
+                setCardStudioSelectedText('');
+                setIsCardStudioOpen(true);
+              }}
+              className="inline-flex items-center gap-1.5 rounded-full px-2.5 sm:px-3 py-1.5 text-xs font-semibold bg-[#8B2F4A]/10 text-[#8B2F4A] hover:bg-[#8B2F4A] hover:text-white dark:bg-[#E06C88]/20 dark:text-[#E06C88] dark:hover:bg-[#E06C88] dark:hover:text-zinc-950 transition-all cursor-pointer"
+              title="Create Lyric Card"
+              aria-label="Create Lyric Card"
+            >
+              <Sparkles className="h-3.5 w-3.5" />
+              <span className="text-[11px] font-medium">Card</span>
+            </button>
+
+            {/* Share Button (Bottom) */}
+            <button
+              id={`modal-share-bottom-${lyric.id}`}
+              onClick={handleShare}
+              className="inline-flex items-center gap-1.5 rounded-full px-2.5 sm:px-3 py-1.5 text-xs font-semibold bg-[var(--bg-muted)] text-[var(--text-primary)] hover:bg-[#8B2F4A]/10 hover:text-[#8B2F4A] dark:hover:text-[#E06C88] transition-colors cursor-pointer"
+              title="Share Lyric"
+              aria-label="Share"
+            >
+              <Share2 className="h-3.5 w-3.5" />
+              <span className="text-[11px] font-medium">Share</span>
+            </button>
           </div>
 
           {/* Right Action Icons (Copy, Edit, Delete) */}
