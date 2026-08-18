@@ -44,13 +44,24 @@ const supabase = isSupabaseConfigured
 // In-memory concurrency tracker to prevent duplicate concurrent OpenAI calls
 const activeTranslationPromises = new Map<string, Promise<any>>();
 
-// API Health Check
+// API Health Checks
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'ok',
     openaiConfigured: Boolean(process.env.OPENAI_API_KEY),
     supabaseConfigured: isSupabaseConfigured,
     timestamp: new Date().toISOString(),
+  });
+});
+
+app.get('/api/translation-health', (req, res) => {
+  res.json({
+    ok: true,
+    service: 'translation-api',
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    openaiConfigured: Boolean(process.env.OPENAI_API_KEY),
+    supabaseConfigured: isSupabaseConfigured,
   });
 });
 
