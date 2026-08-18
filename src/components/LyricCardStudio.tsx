@@ -18,7 +18,7 @@ import {
   ChevronUp
 } from 'lucide-react';
 import { toPng } from 'html-to-image';
-import { Lyric } from '../types';
+import { Lyric, LyricTranslation } from '../types';
 
 export type CardFormat = 'story' | 'square';
 export type CardTemplate = 'editorial' | 'midnight' | 'album' | 'gradient' | 'minimal';
@@ -37,6 +37,7 @@ interface LyricCardStudioProps {
   isOpen: boolean;
   onClose: () => void;
   lyric: Lyric;
+  activeTranslation?: LyricTranslation | null;
   initialSelectedText?: string;
   showToast?: (message: string, type?: 'success' | 'error' | 'info') => void;
 }
@@ -45,6 +46,7 @@ export const LyricCardStudio: React.FC<LyricCardStudioProps> = ({
   isOpen,
   onClose,
   lyric,
+  activeTranslation,
   initialSelectedText,
   showToast,
 }) => {
@@ -55,7 +57,9 @@ export const LyricCardStudio: React.FC<LyricCardStudioProps> = ({
   const [useSelectedText, setUseSelectedText] = useState<boolean>(
     Boolean(initialSelectedText && initialSelectedText.trim().length > 0)
   );
-  const [passageText, setPassageText] = useState<string>(initialSelectedText || '');
+  const [passageText, setPassageText] = useState<string>(
+    initialSelectedText || (activeTranslation ? activeTranslation.translated_content : lyric?.content || '')
+  );
 
   // Text Styling
   const [fontSizePreference, setFontSizePreference] = useState<TextSize>('medium');
@@ -88,12 +92,21 @@ export const LyricCardStudio: React.FC<LyricCardStudioProps> = ({
   const previewContainerRef = useRef<HTMLDivElement>(null);
   const [previewScale, setPreviewScale] = useState<number>(0.3);
 
+  // Sync passage text when opened or when selection / translation changes
   useEffect(() => {
-    if (initialSelectedText) {
+    if (!isOpen) return;
+
+    if (initialSelectedText && initialSelectedText.trim().length > 0) {
       setPassageText(initialSelectedText);
       setUseSelectedText(true);
+    } else if (activeTranslation) {
+      setPassageText(activeTranslation.translated_content);
+      setUseSelectedText(false);
+    } else {
+      setPassageText(lyric?.content || '');
+      setUseSelectedText(false);
     }
-  }, [initialSelectedText]);
+  }, [isOpen, initialSelectedText, activeTranslation, lyric?.content]);
 
   // 1. Calculate On-Screen Preview Scale Factor
   useEffect(() => {
@@ -127,7 +140,8 @@ export const LyricCardStudio: React.FC<LyricCardStudioProps> = ({
     };
   }, [isOpen, format]);
 
-  const currentLyricText = useSelectedText && passageText.trim() ? passageText.trim() : lyric?.content || '';
+  const defaultVersionText = activeTranslation?.translated_content || lyric?.content || '';
+  const currentLyricText = useSelectedText && passageText.trim() ? passageText.trim() : defaultVersionText;
 
   // 2. Dynamic Auto-Fitting Logic (Runs live when text or layout parameters change)
   useLayoutEffect(() => {
@@ -222,7 +236,9 @@ export const LyricCardStudio: React.FC<LyricCardStudioProps> = ({
         },
       });
 
-      const filename = `lyricvault-${lyric.title.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${format}.png`;
+      const titleForFile = activeTranslation?.translated_title || lyric.title;
+      const langSuffix = activeTranslation ? `-${activeTranslation.target_language.toLowerCase().replace(/[^a-z0-9]/g, '-')}` : '';
+      const filename = `lyricvault-${titleForFile.toLowerCase().replace(/[^a-z0-9]/g, '-')}${langSuffix}-${format}.png`;
       const link = document.createElement('a');
       link.download = filename;
       link.href = dataUrl;
@@ -256,23 +272,26 @@ export const LyricCardStudio: React.FC<LyricCardStudioProps> = ({
 
       const blob = await (await fetch(dataUrl)).blob();
       const file = new File([blob], `lyric-card-${format}.png`, { type: 'image/png' });
+      const titleForShare = activeTranslation?.translated_title || lyric.title;
+      const shareTitle = `${titleForShare}${activeTranslation ? ` (${activeTranslation.target_language})` : ''} — LyricVault`;
 
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         await navigator.share({
-          title: `${lyric.title} — LyricVault`,
+          title: shareTitle,
           text: `"${currentLyricText.substring(0, 100)}..."`,
           files: [file],
         });
         showToast?.('Shared successfully!', 'success');
       } else if (navigator.share) {
         await navigator.share({
-          title: `${lyric.title} — LyricVault`,
+          title: shareTitle,
           text: `"${currentLyricText.substring(0, 120)}..."`,
           url: window.location.href,
         });
         showToast?.('Shared link successfully!', 'success');
       } else {
-        const filename = `lyricvault-${lyric.title.toLowerCase().replace(/[^a-z0-9]/g, '-')}.png`;
+        const langSuffix = activeTranslation ? `-${activeTranslation.target_language.toLowerCase().replace(/[^a-z0-9]/g, '-')}` : '';
+        const filename = `lyricvault-${titleForShare.toLowerCase().replace(/[^a-z0-9]/g, '-')}${langSuffix}.png`;
         const link = document.createElement('a');
         link.download = filename;
         link.href = dataUrl;
@@ -298,7 +317,7 @@ export const LyricCardStudio: React.FC<LyricCardStudioProps> = ({
     const isSerif = fontFamily === 'serif';
     const fontClass = isSerif ? 'font-editorial' : 'font-sans';
     const displayArtist = lyric.artist_name || lyric.author_name;
-    const displayTitle = lyric.song_title || lyric.title;
+    const displayTitle = activeTranslation?.translated_title || lyric.song_title || lyric.title;
     const displayAuthor = lyric.created_by?.name;
 
     const currentLineHeight = getLineHeightValue(lineSpacing);
@@ -720,6 +739,26 @@ export const LyricCardStudio: React.FC<LyricCardStudioProps> = ({
         {/* 1. TEXT TAB */}
         {activeCustomizeTab === 'text' && (
           <div className="space-y-4 animate-in fade-in duration-150">
+            {/* Active Translation Indicator */}
+            {activeTranslation && (
+              <div className="p-3 rounded-xl bg-[#8B2F4A]/10 dark:bg-[#E06C88]/15 border border-[#8B2F4A]/25 dark:border-[#E06C88]/30 flex items-center justify-between">
+                <div className="flex items-center gap-2 min-w-0">
+                  <Sparkles className="h-4 w-4 text-[#8B2F4A] dark:text-[#E06C88] shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold text-[#8B2F4A] dark:text-[#E06C88] truncate">
+                      {activeTranslation.target_language} Version
+                    </p>
+                    <p className="text-[10px] text-[var(--text-secondary)] capitalize">
+                      Active {activeTranslation.translation_type}
+                    </p>
+                  </div>
+                </div>
+                <span className="rounded-full bg-[#8B2F4A]/20 dark:bg-[#E06C88]/30 px-2 py-0.5 text-[10px] font-bold text-[#8B2F4A] dark:text-[#E06C88] shrink-0">
+                  Current
+                </span>
+              </div>
+            )}
+
             {/* Passage Source Switcher */}
             {initialSelectedText && (
               <div className="p-3 rounded-xl bg-[var(--bg-muted)] border border-[var(--border-color)] space-y-1.5">
@@ -735,7 +774,7 @@ export const LyricCardStudio: React.FC<LyricCardStudioProps> = ({
                         : 'bg-[var(--bg-surface)] text-[var(--text-secondary)]'
                     }`}
                   >
-                    Selected Note
+                    Selected Excerpt
                   </button>
                   <button
                     onClick={() => setUseSelectedText(false)}
@@ -745,7 +784,7 @@ export const LyricCardStudio: React.FC<LyricCardStudioProps> = ({
                         : 'bg-[var(--bg-surface)] text-[var(--text-secondary)]'
                     }`}
                   >
-                    Full Lyric
+                    Full {activeTranslation ? activeTranslation.target_language : 'Lyric'}
                   </button>
                 </div>
               </div>

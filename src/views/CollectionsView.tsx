@@ -281,8 +281,38 @@ export const CollectionsView: React.FC<CollectionsViewProps> = ({
                   key={lyric.id}
                   lyric={lyric}
                   onSelectLyric={onSelectLyric}
-                  onToggleLike={onToggleLike}
-                  onToggleSave={onToggleSave}
+                  onToggleLike={(e, id) => {
+                    onToggleLike(e, id);
+                    setCollectionLyrics((prev) =>
+                      prev.map((l) => {
+                        if (l.id === id) {
+                          const newLiked = !l.is_liked;
+                          return {
+                            ...l,
+                            is_liked: newLiked,
+                            likes_count: newLiked ? (l.likes_count ?? 0) + 1 : Math.max(0, (l.likes_count ?? 1) - 1),
+                          };
+                        }
+                        return l;
+                      })
+                    );
+                  }}
+                  onToggleSave={(e, id) => {
+                    onToggleSave(e, id);
+                    setCollectionLyrics((prev) =>
+                      prev.map((l) => {
+                        if (l.id === id) {
+                          const newSaved = !l.is_saved;
+                          return {
+                            ...l,
+                            is_saved: newSaved,
+                            saves_count: newSaved ? (l.saves_count ?? 0) + 1 : Math.max(0, (l.saves_count ?? 1) - 1),
+                          };
+                        }
+                        return l;
+                      })
+                    );
+                  }}
                   onOpenAddToCollection={onOpenAddToCollection}
                   onOpenReadingMode={onOpenReadingMode}
                   onRemoveFromCollection={isOwner ? handleRemoveFromCollection : undefined}

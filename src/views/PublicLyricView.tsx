@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Feather,
   Music,
+  Heart,
   Bookmark,
   Share2,
   FolderPlus,
@@ -153,13 +154,38 @@ export const PublicLyricView: React.FC<PublicLyricViewProps> = ({
   // Detect Music Platform details
   const platform = detectMusicPlatform(lyric.song_link);
 
+  const handleLikeClick = (e: React.MouseEvent) => {
+    if (!user) {
+      if (onOpenAuthPrompt) onOpenAuthPrompt();
+      return;
+    }
+    onToggleLike(e, lyric.id);
+    setLyric((prev) => {
+      if (!prev) return prev;
+      const willLike = !prev.is_liked;
+      return {
+        ...prev,
+        is_liked: willLike,
+        likes_count: willLike ? (prev.likes_count ?? 0) + 1 : Math.max(0, (prev.likes_count ?? 1) - 1),
+      };
+    });
+  };
+
   const handleBookmarkClick = (e: React.MouseEvent) => {
     if (!user) {
       if (onOpenAuthPrompt) onOpenAuthPrompt();
       return;
     }
     onToggleSave(e, lyric.id);
-    setLyric((prev) => (prev ? { ...prev, is_saved: !prev.is_saved } : prev));
+    setLyric((prev) => {
+      if (!prev) return prev;
+      const willSave = !prev.is_saved;
+      return {
+        ...prev,
+        is_saved: willSave,
+        saves_count: willSave ? (prev.saves_count ?? 0) + 1 : Math.max(0, (prev.saves_count ?? 1) - 1),
+      };
+    });
   };
 
   const handleOpenCollectionClick = () => {
@@ -308,8 +334,23 @@ export const PublicLyricView: React.FC<PublicLyricViewProps> = ({
             </div>
           )}
 
-          {/* Right: Actions (Bookmark, Collection, Share) */}
+          {/* Right: Actions (Like, Bookmark, Collection, Share) */}
           <div className="flex items-center gap-3">
+            <button
+              id="public-lyric-like-button"
+              type="button"
+              onClick={handleLikeClick}
+              className={`inline-flex items-center gap-2 rounded-2xl px-4 py-2.5 text-xs font-semibold border transition-all ${
+                lyric.is_liked
+                  ? 'bg-rose-50 text-rose-600 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-900/50'
+                  : 'bg-[var(--bg-muted)]/60 text-[var(--text-primary)] border-[var(--border-color)] hover:border-rose-400 hover:text-rose-600'
+              }`}
+              title={`Like (${lyric.likes_count ?? 0})`}
+            >
+              <Heart className={`h-4 w-4 ${lyric.is_liked ? 'fill-rose-500 text-rose-500' : ''}`} />
+              <span>{lyric.likes_count ?? 0}</span>
+            </button>
+
             <button
               id="public-lyric-bookmark-button"
               type="button"
@@ -319,9 +360,10 @@ export const PublicLyricView: React.FC<PublicLyricViewProps> = ({
                   ? 'bg-[#8B2F4A] text-white border-[#8B2F4A]'
                   : 'bg-[var(--bg-muted)]/60 text-[var(--text-primary)] border-[var(--border-color)] hover:border-[#8B2F4A]'
               }`}
+              title={`Save to Vault (${lyric.saves_count ?? 0})`}
             >
               <Bookmark className={`h-4 w-4 ${lyric.is_saved ? 'fill-current' : ''}`} />
-              <span>{lyric.is_saved ? 'Bookmarked' : 'Bookmark'}</span>
+              <span>{lyric.saves_count ?? 0}</span>
             </button>
 
             <button

@@ -30,6 +30,20 @@ export type ThemeType =
   | 'Solitude'
   | 'Time';
 
+export type TranslationType = 'transliteration' | 'translation';
+
+export interface LyricTranslation {
+  id: string;
+  lyric_id: string;
+  target_language: string; // e.g. 'Hinglish (Roman Hindi)', 'Roman Bengali (Banglish)', 'Roman Assamese', 'Roman Urdu', 'English'
+  translation_type: TranslationType;
+  translated_title?: string;
+  translated_content: string;
+  created_by?: string;
+  created_at: string;
+  updated_at?: string;
+}
+
 export interface Lyric {
   id: string;
   title: string;
@@ -60,6 +74,7 @@ export interface Lyric {
   saves_count: number;
   is_liked?: boolean;
   is_saved?: boolean;
+  translations?: LyricTranslation[];
 }
 
 export interface Collection {

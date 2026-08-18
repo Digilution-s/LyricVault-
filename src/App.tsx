@@ -20,7 +20,6 @@ import { PublicProfileView } from './views/PublicProfileView';
 import { PublicLyricView } from './views/PublicLyricView';
 import { LoginView } from './views/LoginView';
 import { SignupView } from './views/SignupView';
-import { INITIAL_LYRICS, INITIAL_COLLECTIONS } from './data/demoData';
 import { Lyric, Collection, MoodType, ThemeType } from './types';
 import { lyricsService } from './services/lyricsService';
 import { bookmarkService } from './services/bookmarkService';
@@ -31,9 +30,9 @@ function MainApp() {
   const { user, profile, isAuthenticated } = useAuth();
   const currentUserId = user?.id || 'demo_user_123';
 
-  // State for lyrics & collections
-  const [lyrics, setLyrics] = useState<Lyric[]>(INITIAL_LYRICS);
-  const [collections, setCollections] = useState<Collection[]>(INITIAL_COLLECTIONS);
+  // State for lyrics & collections - Loaded exclusively from Supabase
+  const [lyrics, setLyrics] = useState<Lyric[]>([]);
+  const [collections, setCollections] = useState<Collection[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   // Toast System
@@ -168,7 +167,7 @@ function MainApp() {
     setAuthPromptOpen(true);
   };
 
-  // Toggle Like Handler with Supabase Integration
+  // Toggle Like Handler with Supabase Integration & Complete Optimistic UI
   const handleToggleLike = async (e: React.MouseEvent, lyricId: string) => {
     e.stopPropagation();
 
@@ -177,38 +176,50 @@ function MainApp() {
       return;
     }
 
-    const target = lyrics.find((l) => l.id === lyricId);
-    if (!target) return;
+    const currentItem =
+      lyrics.find((l) => l.id === lyricId) ||
+      (selectedLyric?.id === lyricId ? selectedLyric : null) ||
+      (readingLyric?.id === lyricId ? readingLyric : null);
 
-    const willLike = !target.is_liked;
+    const willLike = currentItem ? !currentItem.is_liked : true;
 
-    // Optimistic UI update
+    // 1. Immediate Optimistic UI updates across all active views & modals
     setLyrics((prev) =>
       prev.map((l) => {
         if (l.id === lyricId) {
           return {
             ...l,
             is_liked: willLike,
-            likes_count: willLike ? l.likes_count + 1 : Math.max(0, l.likes_count - 1),
+            likes_count: willLike ? (l.likes_count ?? 0) + 1 : Math.max(0, (l.likes_count ?? 1) - 1),
           };
         }
         return l;
       })
     );
 
-    if (selectedLyric && selectedLyric.id === lyricId) {
-      setSelectedLyric((prev) =>
-        prev
-          ? {
-              ...prev,
-              is_liked: willLike,
-              likes_count: willLike ? prev.likes_count + 1 : Math.max(0, prev.likes_count - 1),
-            }
-          : null
-      );
-    }
+    setSelectedLyric((prev) => {
+      if (prev && prev.id === lyricId) {
+        return {
+          ...prev,
+          is_liked: willLike,
+          likes_count: willLike ? (prev.likes_count ?? 0) + 1 : Math.max(0, (prev.likes_count ?? 1) - 1),
+        };
+      }
+      return prev;
+    });
 
-    // Persist to Supabase
+    setReadingLyric((prev) => {
+      if (prev && prev.id === lyricId) {
+        return {
+          ...prev,
+          is_liked: willLike,
+          likes_count: willLike ? (prev.likes_count ?? 0) + 1 : Math.max(0, (prev.likes_count ?? 1) - 1),
+        };
+      }
+      return prev;
+    });
+
+    // 2. Persist to Supabase in background
     try {
       const res = await likeService.toggleLike(currentUserId, lyricId);
       // Sync exact count and liked state from server
@@ -225,11 +236,19 @@ function MainApp() {
         })
       );
 
-      if (selectedLyric && selectedLyric.id === lyricId) {
-        setSelectedLyric((prev) =>
-          prev ? { ...prev, is_liked: res.liked, likes_count: res.count } : null
-        );
-      }
+      setSelectedLyric((prev) => {
+        if (prev && prev.id === lyricId) {
+          return { ...prev, is_liked: res.liked, likes_count: res.count };
+        }
+        return prev;
+      });
+
+      setReadingLyric((prev) => {
+        if (prev && prev.id === lyricId) {
+          return { ...prev, is_liked: res.liked, likes_count: res.count };
+        }
+        return prev;
+      });
     } catch (err) {
       console.error('Error toggling like:', err);
       // Revert optimistic update on failure
@@ -239,29 +258,39 @@ function MainApp() {
             return {
               ...l,
               is_liked: !willLike,
-              likes_count: !willLike ? l.likes_count + 1 : Math.max(0, l.likes_count - 1),
+              likes_count: !willLike ? (l.likes_count ?? 0) + 1 : Math.max(0, (l.likes_count ?? 1) - 1),
             };
           }
           return l;
         })
       );
 
-      if (selectedLyric && selectedLyric.id === lyricId) {
-        setSelectedLyric((prev) =>
-          prev
-            ? {
-                ...prev,
-                is_liked: !willLike,
-                likes_count: !willLike ? prev.likes_count + 1 : Math.max(0, prev.likes_count - 1),
-              }
-            : null
-        );
-      }
+      setSelectedLyric((prev) => {
+        if (prev && prev.id === lyricId) {
+          return {
+            ...prev,
+            is_liked: !willLike,
+            likes_count: !willLike ? (prev.likes_count ?? 0) + 1 : Math.max(0, (prev.likes_count ?? 1) - 1),
+          };
+        }
+        return prev;
+      });
+
+      setReadingLyric((prev) => {
+        if (prev && prev.id === lyricId) {
+          return {
+            ...prev,
+            is_liked: !willLike,
+            likes_count: !willLike ? (prev.likes_count ?? 0) + 1 : Math.max(0, (prev.likes_count ?? 1) - 1),
+          };
+        }
+        return prev;
+      });
       showToast('Could not sync like with server.', 'error');
     }
   };
 
-  // Toggle Bookmark / Save with Supabase Integration
+  // Toggle Bookmark / Save with Supabase Integration & Complete Optimistic UI
   const handleToggleSave = async (e: React.MouseEvent, lyricId: string) => {
     e.stopPropagation();
 
@@ -270,38 +299,50 @@ function MainApp() {
       return;
     }
 
-    const target = lyrics.find((l) => l.id === lyricId);
-    if (!target) return;
+    const currentItem =
+      lyrics.find((l) => l.id === lyricId) ||
+      (selectedLyric?.id === lyricId ? selectedLyric : null) ||
+      (readingLyric?.id === lyricId ? readingLyric : null);
 
-    const willSave = !target.is_saved;
+    const willSave = currentItem ? !currentItem.is_saved : true;
 
-    // Optimistic UI update
+    // 1. Immediate Optimistic UI updates across all active views & modals
     setLyrics((prev) =>
       prev.map((l) => {
         if (l.id === lyricId) {
           return {
             ...l,
             is_saved: willSave,
-            saves_count: willSave ? l.saves_count + 1 : Math.max(0, l.saves_count - 1),
+            saves_count: willSave ? (l.saves_count ?? 0) + 1 : Math.max(0, (l.saves_count ?? 1) - 1),
           };
         }
         return l;
       })
     );
 
-    if (selectedLyric && selectedLyric.id === lyricId) {
-      setSelectedLyric((prev) =>
-        prev
-          ? {
-              ...prev,
-              is_saved: willSave,
-              saves_count: willSave ? prev.saves_count + 1 : Math.max(0, prev.saves_count - 1),
-            }
-          : null
-      );
-    }
+    setSelectedLyric((prev) => {
+      if (prev && prev.id === lyricId) {
+        return {
+          ...prev,
+          is_saved: willSave,
+          saves_count: willSave ? (prev.saves_count ?? 0) + 1 : Math.max(0, (prev.saves_count ?? 1) - 1),
+        };
+      }
+      return prev;
+    });
 
-    // Call Supabase service
+    setReadingLyric((prev) => {
+      if (prev && prev.id === lyricId) {
+        return {
+          ...prev,
+          is_saved: willSave,
+          saves_count: willSave ? (prev.saves_count ?? 0) + 1 : Math.max(0, (prev.saves_count ?? 1) - 1),
+        };
+      }
+      return prev;
+    });
+
+    // 2. Call Supabase service in background
     try {
       if (willSave) {
         await bookmarkService.bookmarkLyric(currentUserId, lyricId);
@@ -312,6 +353,41 @@ function MainApp() {
       }
     } catch (err) {
       console.error('Error toggling bookmark:', err);
+      // Revert optimistic update on failure
+      setLyrics((prev) =>
+        prev.map((l) => {
+          if (l.id === lyricId) {
+            return {
+              ...l,
+              is_saved: !willSave,
+              saves_count: !willSave ? (l.saves_count ?? 0) + 1 : Math.max(0, (l.saves_count ?? 1) - 1),
+            };
+          }
+          return l;
+        })
+      );
+
+      setSelectedLyric((prev) => {
+        if (prev && prev.id === lyricId) {
+          return {
+            ...prev,
+            is_saved: !willSave,
+            saves_count: !willSave ? (prev.saves_count ?? 0) + 1 : Math.max(0, (prev.saves_count ?? 1) - 1),
+          };
+        }
+        return prev;
+      });
+
+      setReadingLyric((prev) => {
+        if (prev && prev.id === lyricId) {
+          return {
+            ...prev,
+            is_saved: !willSave,
+            saves_count: !willSave ? (prev.saves_count ?? 0) + 1 : Math.max(0, (prev.saves_count ?? 1) - 1),
+          };
+        }
+        return prev;
+      });
       showToast('Could not sync bookmark with server.', 'error');
     }
   };
@@ -697,6 +773,7 @@ function MainApp() {
         onClose={() => setReadingLyric(null)}
         onToggleLike={handleToggleLike}
         onToggleSave={handleToggleSave}
+        onSelectCreator={handleSelectCreator}
         onOpenAddToCollection={handleOpenAddToCollection}
         currentUserId={user?.id}
         onOpenAuthPrompt={handleOpenAuthPrompt}

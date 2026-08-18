@@ -114,20 +114,29 @@ export const HomeView: React.FC<HomeViewProps> = ({
             </button>
           </div>
 
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {trendingLyrics.map((lyric) => (
-              <LyricCard
-                key={lyric.id}
-                lyric={lyric}
-                onSelectLyric={onSelectLyric}
-                onSelectCreator={onSelectCreator}
-                onToggleLike={onToggleLike}
-                onToggleSave={onToggleSave}
-                onOpenAddToCollection={onOpenAddToCollection}
-                onOpenReadingMode={onOpenReadingMode}
-              />
-            ))}
-          </div>
+          {trendingLyrics.length > 0 ? (
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {trendingLyrics.map((lyric) => (
+                <LyricCard
+                  key={lyric.id}
+                  lyric={lyric}
+                  onSelectLyric={onSelectLyric}
+                  onSelectCreator={onSelectCreator}
+                  onToggleLike={onToggleLike}
+                  onToggleSave={onToggleSave}
+                  onOpenAddToCollection={onOpenAddToCollection}
+                  onOpenReadingMode={onOpenReadingMode}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-3xl border border-dashed border-[var(--border-color)] bg-[var(--bg-surface)]/50 p-10 text-center space-y-3">
+              <p className="text-sm font-medium text-[var(--text-primary)]">No lyrics yet</p>
+              <p className="text-xs text-[var(--text-secondary)] max-w-sm mx-auto">
+                Use the box above to save the first lyric into your Supabase database.
+              </p>
+            </div>
+          )}
         </section>
 
         {/* Recently Saved Section */}
@@ -153,20 +162,29 @@ export const HomeView: React.FC<HomeViewProps> = ({
             </button>
           </div>
 
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {recentLyrics.map((lyric) => (
-              <LyricCard
-                key={lyric.id}
-                lyric={lyric}
-                onSelectLyric={onSelectLyric}
-                onSelectCreator={onSelectCreator}
-                onToggleLike={onToggleLike}
-                onToggleSave={onToggleSave}
-                onOpenAddToCollection={onOpenAddToCollection}
-                onOpenReadingMode={onOpenReadingMode}
-              />
-            ))}
-          </div>
+          {recentLyrics.length > 0 ? (
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {recentLyrics.map((lyric) => (
+                <LyricCard
+                  key={lyric.id}
+                  lyric={lyric}
+                  onSelectLyric={onSelectLyric}
+                  onSelectCreator={onSelectCreator}
+                  onToggleLike={onToggleLike}
+                  onToggleSave={onToggleSave}
+                  onOpenAddToCollection={onOpenAddToCollection}
+                  onOpenReadingMode={onOpenReadingMode}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-3xl border border-dashed border-[var(--border-color)] bg-[var(--bg-surface)]/50 p-10 text-center space-y-3">
+              <p className="text-sm font-medium text-[var(--text-primary)]">Your vault is ready</p>
+              <p className="text-xs text-[var(--text-secondary)] max-w-sm mx-auto">
+                Save your favorite verses, poetry, or quotes to build your shared collection.
+              </p>
+            </div>
+          )}
         </section>
 
         {/* Browse by Mood */}

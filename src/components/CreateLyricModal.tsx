@@ -159,14 +159,21 @@ export const CreateLyricModal: React.FC<CreateLyricModalProps> = ({
     onClose();
   };
 
-  const toggleTheme = (theme: ThemeType) => {
-    if (selectedThemes.includes(theme)) {
-      setSelectedThemes(selectedThemes.filter((t) => t !== theme));
+  const toggleTheme = (theme: string) => {
+    const existingIndex = selectedThemes.findIndex((t) => t.toLowerCase() === theme.toLowerCase());
+    if (existingIndex >= 0) {
+      setSelectedThemes(selectedThemes.filter((_, idx) => idx !== existingIndex));
     } else {
       if (selectedThemes.length < 3) {
-        setSelectedThemes([...selectedThemes, theme]);
+        setSelectedThemes([...selectedThemes, theme as ThemeType]);
+      } else {
+        showToast('You can select up to 3 themes.', 'info');
       }
     }
+  };
+
+  const removeTheme = (themeToRemove: string) => {
+    setSelectedThemes(selectedThemes.filter((t) => t.toLowerCase() !== themeToRemove.toLowerCase()));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -652,21 +659,60 @@ export const CreateLyricModal: React.FC<CreateLyricModalProps> = ({
 
           {/* Theme Selector */}
           <div>
-            <label className="block text-xs font-semibold text-[var(--text-primary)] mb-1">
-              Select Themes <span className="font-normal text-[var(--text-secondary)]">(Optional, select up to 3)</span>
-            </label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-xs font-semibold text-[var(--text-primary)]">
+                Select Themes <span className="font-normal text-[var(--text-secondary)]">({selectedThemes.length}/3 selected)</span>
+              </label>
+              {selectedThemes.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setSelectedThemes([])}
+                  className="text-[11px] text-[var(--text-secondary)] hover:text-rose-500 transition-colors"
+                >
+                  Clear all
+                </button>
+              )}
+            </div>
+
+            {/* Currently Selected Themes with explicit remove buttons */}
+            {selectedThemes.length > 0 && (
+              <div className="mb-2 flex flex-wrap gap-1.5 p-2 rounded-lg bg-[var(--bg-muted)]/60 border border-[var(--border-color)]/60">
+                {selectedThemes.map((theme) => (
+                  <span
+                    key={theme}
+                    className="inline-flex items-center gap-1 rounded-md bg-[#8B2F4A] text-white dark:bg-[#E06C88] dark:text-zinc-950 px-2 py-1 text-xs font-semibold shadow-xs"
+                  >
+                    <span>#{theme}</span>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeTheme(theme);
+                      }}
+                      className="rounded-full p-0.5 hover:bg-black/20 dark:hover:bg-white/20 transition-colors cursor-pointer"
+                      title={`Remove ${theme}`}
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+
             <div className="flex flex-wrap gap-1.5">
               {THEMES.map((t) => {
-                const isSel = selectedThemes.includes(t.id);
+                const isSel = selectedThemes.some(
+                  (st) => st.toLowerCase() === t.id.toLowerCase() || st.toLowerCase() === t.label.toLowerCase()
+                );
                 return (
                   <button
                     key={t.id}
                     type="button"
                     onClick={() => toggleTheme(t.id)}
-                    className={`rounded-lg px-2.5 py-1 text-xs font-medium transition-colors cursor-pointer ${
+                    className={`rounded-lg px-2.5 py-1 text-xs font-medium transition-all cursor-pointer border ${
                       isSel
-                        ? 'bg-[#8B2F4A]/15 text-[#8B2F4A] font-semibold dark:bg-[#E06C88]/20 dark:text-[#E06C88]'
-                        : 'bg-[var(--bg-muted)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                        ? 'bg-[#8B2F4A]/15 text-[#8B2F4A] border-[#8B2F4A]/50 font-bold dark:bg-[#E06C88]/20 dark:text-[#E06C88] dark:border-[#E06C88]/50'
+                        : 'bg-[var(--bg-surface)] text-[var(--text-secondary)] border-[var(--border-color)] hover:text-[var(--text-primary)] hover:border-[var(--text-secondary)]/50'
                     }`}
                   >
                     #{t.label}

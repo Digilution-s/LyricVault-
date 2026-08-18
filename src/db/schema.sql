@@ -58,12 +58,30 @@ CREATE TABLE IF NOT EXISTS public.bookmarks (
   CONSTRAINT unique_user_lyric_bookmark UNIQUE (user_id, lyric_id)
 );
 
+-- 6. Create Lyric Translations Table (Global Shared Canonical Cache)
+CREATE TABLE IF NOT EXISTS public.lyric_translations (
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+  lyric_id TEXT NOT NULL,                  -- Accepts both UUIDs and string lyric IDs (e.g., 'lyric-11')
+  target_language TEXT NOT NULL,          -- e.g., 'Hinglish (Roman Hindi)', 'Roman Bengali (Banglish)', 'Roman Assamese', 'Roman Urdu', 'English Translation'
+  translation_type TEXT NOT NULL,         -- 'transliteration' or 'translation'
+  translated_title TEXT,                  -- Optional Romanized / translated title
+  translated_content TEXT NOT NULL,       -- Translated/Transliterated lyric text
+  created_by TEXT DEFAULT 'community',    -- Initiating User ID or 'community' (audit only; does NOT restrict access)
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  CONSTRAINT unique_lyric_lang_type UNIQUE (lyric_id, target_language, translation_type)
+);
+
+CREATE INDEX IF NOT EXISTS idx_lyric_translations_lyric_id ON public.lyric_translations(lyric_id);
+CREATE INDEX IF NOT EXISTS idx_lyric_translations_lookup ON public.lyric_translations(lyric_id, target_language, translation_type);
+
 -- Enable Row Level Security (RLS)
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.lyrics ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.bookmarks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.themes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.lyric_themes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lyric_translations ENABLE ROW LEVEL SECURITY;
 
 -- Profiles RLS
 DROP POLICY IF EXISTS "Public profiles are viewable by everyone" ON public.profiles;
@@ -121,6 +139,19 @@ CREATE POLICY "Lyric themes are viewable by everyone" ON public.lyric_themes
 DROP POLICY IF EXISTS "Lyric themes can be modified by everyone" ON public.lyric_themes;
 CREATE POLICY "Lyric themes can be modified by everyone" ON public.lyric_themes
   FOR ALL USING (true) WITH CHECK (true);
+
+-- Lyric Translations RLS
+DROP POLICY IF EXISTS "Lyric translations are viewable by everyone" ON public.lyric_translations;
+CREATE POLICY "Lyric translations are viewable by everyone" ON public.lyric_translations
+  FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Anyone can insert lyric translations" ON public.lyric_translations;
+CREATE POLICY "Anyone can insert lyric translations" ON public.lyric_translations
+  FOR INSERT WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Users can update lyric translations" ON public.lyric_translations;
+CREATE POLICY "Users can update lyric translations" ON public.lyric_translations
+  FOR UPDATE USING (true);
 
 -- Seed Initial Default Themes
 INSERT INTO public.themes (id, name, slug, description)
